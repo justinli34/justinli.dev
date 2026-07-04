@@ -1,0 +1,62 @@
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@400&family=Noto+Serif+SC:wght@500&display=swap");
+
+:root {
+  --color-bg: oklch(0.1 0 0);
+  --color-fg: oklch(0.8 0 0);
+  --color-fg-strong: oklch(0.9 0 0);
+  --color-muted: oklch(0.6 0 0);
+  --color-border: oklch(0.3 0 0);
+  --color-selection: oklch(0.35 0 0);
+
+  font-family: Geist, system-ui;
+  line-height: 1.5;
+
+  color: var(--color-fg);
+  background-color: var(--color-bg);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  scrollbar-gutter: stable both-edges;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration-color: var(--color-muted);
+}
+
+a:hover {
+  color: var(--color-fg-strong);
+  text-decoration-color: var(--color-fg-strong);
+}
+
+::selection {
+  background-color: var(--color-selection);
+  color: var(--color-fg-strong);
+}
+
+time {
+  color: var(--color-muted);
+}
+
+article p + p {
+  margin-top: 1rem;
+}

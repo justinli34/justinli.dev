@@ -1,0 +1,75 @@
+---
+import { getCollection } from "astro:content";
+
+import BaseLayout from "@/layouts/BaseLayout.astro";
+
+const posts = (await getCollection("blog")).sort((first, second) =>
+  second.data.date.localeCompare(first.data.date),
+);
+---
+
+<BaseLayout>
+  <section aria-label="About">
+    <p class="about">
+      Hi, I'm Justin, a third-year computer science student at UBC and a
+      Software Development Engineer Intern at Amazon. I enjoy learning and
+      building distributed systems. Outside of coding, I like to make <a
+        href="https://www.youtube.com/@justinli34"
+        target="_blank"
+        rel="noopener noreferrer">music</a
+      > and research stocks. Feel free to message me on <a
+        href="https://www.linkedin.com/in/justinlibc"
+        target="_blank"
+        rel="noopener noreferrer">LinkedIn</a
+      > or email justin@justinli.dev. My projects are on <a
+        href="https://github.com/justinli34"
+        target="_blank"
+        rel="noopener noreferrer">GitHub</a
+      >.
+    </p>
+  </section>
+  <section class="posts" aria-label="Posts">
+    <ul>
+      {
+        posts.map((post) => (
+          <li>
+            {post.data.date && (
+              <time datetime={post.data.date}>{post.data.date}</time>
+            )}
+            <a href={`/blog/${encodeURIComponent(post.id)}`}>
+              {post.data.title}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</BaseLayout>
+
+<style>
+  .about {
+    text-wrap: pretty;
+  }
+
+  .posts {
+    width: 100%;
+    border-top: 1px solid var(--color-border);
+    padding-top: 1rem;
+  }
+
+  ul {
+    display: grid;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+  }
+
+  li {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .posts a {
+    text-decoration: none;
+  }
+</style>

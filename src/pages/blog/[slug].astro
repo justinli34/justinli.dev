@@ -1,0 +1,49 @@
+---
+import { getCollection, render } from "astro:content";
+import type { CollectionEntry } from "astro:content";
+
+import BaseLayout from "@/layouts/BaseLayout.astro";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog");
+
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+type Props = {
+  post: CollectionEntry<"blog">;
+};
+
+const { post } = Astro.props as Props;
+const { Content } = await render(post);
+---
+
+<BaseLayout title={`${post.data.title} | Justin Li`}>
+  <article>
+    <header>
+      <h1>{post.data.title}</h1>
+      {
+        post.data.date && (
+          <time datetime={post.data.date}>{post.data.date}</time>
+        )
+      }
+    </header>
+    <div>
+      <Content />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  article {
+    display: grid;
+    gap: 1rem;
+  }
+
+  header {
+    display: grid;
+  }
+</style>
