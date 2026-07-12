@@ -9,26 +9,51 @@ const posts = (await getCollection("blog")).sort((first, second) =>
 ---
 
 <BaseLayout>
+  <section class="links" aria-label="Links">
+    <ul>
+      <li>
+        <a
+          href="https://www.linkedin.com/in/justinlibc"
+          target="_blank"
+          rel="noopener noreferrer">LinkedIn</a
+        >
+      </li>
+      <li>
+        <a
+          href="https://github.com/justinli34"
+          target="_blank"
+          rel="noopener noreferrer">GitHub</a
+        >
+      </li>
+      <li>
+        <a
+          href="https://x.com/justinlidev"
+          target="_blank"
+          rel="noopener noreferrer">X</a
+        >
+      </li>
+      <li>
+        <a
+          href="https://www.youtube.com/@justinli34"
+          target="_blank"
+          rel="noopener noreferrer">YouTube</a
+        >
+      </li>
+      <li>
+        <a href="mailto:justin@justinli.dev">justin@justinli.dev</a>
+      </li>
+    </ul>
+  </section>
   <section aria-label="About">
     <p class="about">
-      Hi, I'm Justin, a third-year computer science student at UBC and a
-      Software Development Engineer Intern at Amazon. I enjoy learning and
-      building distributed systems. Outside of coding, I like to make <a
-        href="https://www.youtube.com/@justinli34"
-        target="_blank"
-        rel="noopener noreferrer">music</a
-      > and research stocks. Feel free to message me on <a
-        href="https://www.linkedin.com/in/justinlibc"
-        target="_blank"
-        rel="noopener noreferrer">LinkedIn</a
-      > or email <a href="mailto:justin@justinli.dev">justin@justinli.dev</a>.
-      My projects are on <a
-        href="https://github.com/justinli34"
-        target="_blank"
-        rel="noopener noreferrer">GitHub</a
-      >.
+      Hi, I'm Justin, a fourth-year CS student at UBC and an SDE Intern at
+      Amazon. I'm interested in AI, cloud infrastructure, and developer tools.
+      Outside of coding, I like to make electronic music, play tennis, travel,
+      and research stocks. I'm currently looking for full-time software
+      engineering jobs.
     </p>
   </section>
+
   <section class="posts" aria-label="Posts">
     <ul>
       {
@@ -54,18 +79,26 @@ const posts = (await getCollection("blog")).sort((first, second) =>
 
   .posts {
     width: 100%;
-    border-top: 1px solid var(--color-border);
-    padding-top: 1rem;
   }
 
   ul {
-    display: grid;
-    gap: 0.25rem;
     margin: 0;
     padding: 0;
+    list-style: none;
   }
 
-  li {
+  .links ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .posts ul {
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .posts li {
     display: flex;
     gap: 0.75rem;
   }
