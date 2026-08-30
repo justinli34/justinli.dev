@@ -18,15 +18,13 @@ const posts = (await getCollection("blog")).sort((first, second) =>
 <BaseLayout>
   <section class="links" aria-label="Links">
     <ul>
-      {
-        externalLinks.map(([label, href]) => (
+      {externalLinks.map(([label, href]) => (
           <li>
             <a href={href} target="_blank" rel="noopener noreferrer">
               {label}
             </a>
           </li>
-        ))
-      }
+        ))}
       <li>
         <a href="mailto:justin@justinli.dev">justin@justinli.dev</a>
       </li>
@@ -45,8 +43,7 @@ const posts = (await getCollection("blog")).sort((first, second) =>
 
   <section class="posts" aria-label="Posts">
     <ul>
-      {
-        posts.map((post) => (
+      {posts.map((post) => (
           <li>
             {post.data.date && (
               <time datetime={post.data.date}>{post.data.date}</time>
@@ -55,8 +52,7 @@ const posts = (await getCollection("blog")).sort((first, second) =>
               {post.data.title}
             </a>
           </li>
-        ))
-      }
+        ))}
     </ul>
   </section>
 </BaseLayout>

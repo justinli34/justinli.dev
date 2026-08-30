@@ -1,5 +1,5 @@
 ---
-import { getCollection, render, type CollectionEntry } from "astro:content";
+import { type CollectionEntry, getCollection, render } from "astro:content";
 
 import BaseLayout from "@/layouts/BaseLayout.astro";
 
@@ -22,11 +22,9 @@ const { Content } = await render(post);
   <article>
     <header>
       <h1>{post.data.title}</h1>
-      {
-        post.data.date && (
+      {post.data.date && (
           <time datetime={post.data.date}>{post.data.date}</time>
-        )
-      }
+        )}
     </header>
     <div>
       <Content />
