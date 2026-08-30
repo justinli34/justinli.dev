@@ -6,12 +6,38 @@
 
 <style>
   a {
+    position: relative;
     display: inline-flex;
+  }
+
+  a::after {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 45%, #fffb, transparent 55%)
+      100% / 400% 100%;
+    content: "";
+    mask: url("/gloryofthesnow.png") center / contain no-repeat;
+  }
+
+  a:hover::after {
+    animation: shimmer 700ms ease-out;
   }
 
   img {
     display: block;
     width: 3rem;
     height: 3rem;
+  }
+
+  @keyframes shimmer {
+    to {
+      background-position: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    a:hover::after {
+      animation: none;
+    }
   }
 </style>
