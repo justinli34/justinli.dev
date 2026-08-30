@@ -1,13 +1,10 @@
 ---
-import { getCollection, render } from "astro:content";
-import type { CollectionEntry } from "astro:content";
+import { getCollection, render, type CollectionEntry } from "astro:content";
 
 import BaseLayout from "@/layouts/BaseLayout.astro";
 
 export async function getStaticPaths() {
-  const posts = await getCollection("blog");
-
-  return posts.map((post) => ({
+  return (await getCollection("blog")).map((post) => ({
     params: { slug: post.id },
     props: { post },
   }));
@@ -41,9 +38,5 @@ const { Content } = await render(post);
   article {
     display: grid;
     gap: 1rem;
-  }
-
-  header {
-    display: grid;
   }
 </style>

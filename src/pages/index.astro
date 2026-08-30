@@ -3,6 +3,13 @@ import { getCollection } from "astro:content";
 
 import BaseLayout from "@/layouts/BaseLayout.astro";
 
+const externalLinks = [
+  ["LinkedIn", "https://www.linkedin.com/in/justinlibc"],
+  ["GitHub", "https://github.com/justinli34"],
+  ["X", "https://x.com/justinlidev"],
+  ["YouTube", "https://www.youtube.com/@justinli34"],
+] as const;
+
 const posts = (await getCollection("blog")).sort((first, second) =>
   second.data.date.localeCompare(first.data.date),
 );
@@ -11,34 +18,15 @@ const posts = (await getCollection("blog")).sort((first, second) =>
 <BaseLayout>
   <section class="links" aria-label="Links">
     <ul>
-      <li>
-        <a
-          href="https://www.linkedin.com/in/justinlibc"
-          target="_blank"
-          rel="noopener noreferrer">LinkedIn</a
-        >
-      </li>
-      <li>
-        <a
-          href="https://github.com/justinli34"
-          target="_blank"
-          rel="noopener noreferrer">GitHub</a
-        >
-      </li>
-      <li>
-        <a
-          href="https://x.com/justinlidev"
-          target="_blank"
-          rel="noopener noreferrer">X</a
-        >
-      </li>
-      <li>
-        <a
-          href="https://www.youtube.com/@justinli34"
-          target="_blank"
-          rel="noopener noreferrer">YouTube</a
-        >
-      </li>
+      {
+        externalLinks.map(([label, href]) => (
+          <li>
+            <a href={href} target="_blank" rel="noopener noreferrer">
+              {label}
+            </a>
+          </li>
+        ))
+      }
       <li>
         <a href="mailto:justin@justinli.dev">justin@justinli.dev</a>
       </li>
@@ -76,10 +64,6 @@ const posts = (await getCollection("blog")).sort((first, second) =>
 <style>
   .about {
     text-wrap: pretty;
-  }
-
-  .posts {
-    width: 100%;
   }
 
   ul {
