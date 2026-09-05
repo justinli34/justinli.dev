@@ -1,4 +1,5 @@
 ---
+import CyanotypePaper from "@/components/CyanotypePaper.astro";
 import Header from "@/components/Header.astro";
 import "@/styles/global.css";
 
@@ -13,7 +14,7 @@ const { title = "Justin Li" } = Astro.props;
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/gloryofthesnow.png" />
+    <link rel="icon" type="image/png" href="/gloryofthesnow.png?v=cyanotype" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -25,21 +26,64 @@ const { title = "Justin Li" } = Astro.props;
   </head>
 
   <body>
-    <main>
-      <Header />
-      <slot />
-    </main>
+    <div class="paper">
+      <CyanotypePaper />
+      <main>
+        <Header />
+        <slot />
+      </main>
+    </div>
   </body>
 </html>
 
 <style>
+  .paper {
+    position: relative;
+    isolation: isolate;
+    min-height: max(760px, 100svh);
+    background: var(--color-bg);
+  }
+
   main {
     display: flex;
     flex-direction: column;
-    max-width: 700px;
-    min-height: 100vh;
-    gap: 1rem;
-    margin: 0 auto;
-    padding: 4rem 2rem 2rem;
+    width: min(34rem, 43%);
+    gap: 1.75rem;
+    margin-left: clamp(5rem, 18vw, 22rem);
+    padding: clamp(5rem, 13vh, 9rem) 0 9rem;
+    overflow-wrap: anywhere;
+  }
+
+  @media (min-width: 1700px) {
+    main {
+      margin-left: calc((100% - 62rem) / 2);
+    }
+  }
+
+  @media (max-width: 1100px) {
+    main {
+      margin-left: 10%;
+      width: 50%;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .paper {
+      min-height: 100svh;
+    }
+
+    main {
+      width: auto;
+      max-width: 38rem;
+      margin: 0 auto;
+      padding: 4rem 2rem 26rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    main {
+      gap: 1.5rem;
+      padding: 2.75rem 1.5rem 30rem;
+    }
   }
 </style>

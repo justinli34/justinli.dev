@@ -1,0 +1,55 @@
+---
+import { getImage, Image } from "astro:assets";
+
+import botanicalPrint from "@/assets/cyanotype-botanical.png";
+import mobilePrint from "@/assets/cyanotype-botanical-mobile.png";
+
+const mobileImages = await Promise.all(
+  [480, 900].map((width) =>
+    getImage({ src: mobilePrint, width, format: "webp", quality: 85 }),
+  ),
+);
+---
+
+<picture class="botanical-print" aria-hidden="true">
+  <source
+    media="(max-width: 900px)"
+    type="image/webp"
+    srcset={mobileImages.map((image) => `${image.src} ${image.attributes.width}w`).join(", ")}
+    sizes="100vw"
+    width={mobilePrint.width}
+    height={mobilePrint.height}
+  />
+  <Image
+    src={botanicalPrint}
+    alt=""
+    widths={[640, 960, 1536]}
+    sizes="100vw"
+    format="webp"
+    quality={85}
+    loading="eager"
+    decoding="async"
+    fetchpriority="high"
+  />
+</picture>
+
+<style>
+  .botanical-print {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  img {
+    /* Crop the unexposed paper edge out of both botanical compositions. */
+    position: absolute;
+    inset: -4%;
+    display: block;
+    width: 108%;
+    height: 108%;
+    object-fit: fill;
+  }
+</style>

@@ -1,12 +1,12 @@
 :root {
-  --color-bg: oklch(0.1 0 0);
-  --color-fg: oklch(0.8 0 0);
-  --color-fg-strong: oklch(1 0 0);
-  --color-muted: oklch(0.6 0 0);
-  --color-selection: oklch(0.35 0 0);
+  --color-bg: #07336a;
+  --color-fg: #e1e9eb;
+  --color-fg-strong: #fffaf0;
+  --color-muted: #afc4d5;
+  --color-selection: #d6e5e9;
 
-  font-family: Geist, system-ui;
-  line-height: 1.5;
+  font-family: Geist, system-ui, sans-serif;
+  line-height: 1.75;
 
   color: var(--color-fg);
   background-color: var(--color-bg);
@@ -16,7 +16,7 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  scrollbar-gutter: stable both-edges;
+  scrollbar-color: #637f98 var(--color-bg);
 }
 
 * {
@@ -38,6 +38,11 @@ p {
 a {
   color: inherit;
   text-decoration-color: var(--color-muted);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.3em;
+  transition:
+    color 180ms ease,
+    text-decoration-color 180ms ease;
 }
 
 a:hover {
@@ -45,15 +50,48 @@ a:hover {
   text-decoration-color: var(--color-fg-strong);
 }
 
+a:focus-visible {
+  outline: 1px solid var(--color-fg-strong);
+  outline-offset: 6px;
+  border-radius: 1px;
+}
+
 ::selection {
   background-color: var(--color-selection);
-  color: var(--color-fg-strong);
+  color: var(--color-bg);
 }
 
 time {
   color: var(--color-muted);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.015em;
 }
 
 article p + p {
   margin-top: 1rem;
+}
+
+article h1 {
+  color: var(--color-fg-strong);
+  font-size: 1.5rem;
+  font-weight: 400;
+  line-height: 1.35;
+  letter-spacing: -0.035em;
+}
+
+article img,
+article video {
+  max-width: 100%;
+  height: auto;
+}
+
+article pre {
+  overflow-x: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  a {
+    transition: none;
+  }
 }
