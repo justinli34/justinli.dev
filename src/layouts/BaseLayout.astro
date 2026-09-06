@@ -1,12 +1,15 @@
 ---
+import { ClientRouter } from "astro:transitions";
+
 import Header from "@/components/Header.astro";
 import "@/styles/global.css";
 
 type Props = {
   title?: string;
+  centered?: boolean;
 };
 
-const { title = "Justin Li" } = Astro.props;
+const { title = "Justin Li", centered = true } = Astro.props;
 ---
 
 <!doctype html>
@@ -22,10 +25,11 @@ const { title = "Justin Li" } = Astro.props;
     />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
+    <ClientRouter fallback="none" />
   </head>
 
   <body>
-    <main>
+    <main class:list={{ centered }}>
       <Header />
       <slot />
     </main>
@@ -33,13 +37,33 @@ const { title = "Justin Li" } = Astro.props;
 </html>
 
 <style>
+  :global(:root) {
+    --header-transition-duration: 250ms;
+  }
+
+  :global(::view-transition-group(site-header)) {
+    animation-duration: var(--header-transition-duration);
+  }
+
+  :global(::view-transition-new(root)) {
+    animation-delay: var(--header-transition-duration);
+    animation-fill-mode: both;
+  }
+
   main {
     display: flex;
     flex-direction: column;
     max-width: 700px;
-    min-height: 100vh;
+    min-height: 100dvh;
     gap: 1rem;
     margin: 0 auto;
     padding: 4rem 2rem 2rem;
+  }
+
+  @media (min-width: 768px) {
+    main.centered {
+      justify-content: center;
+      padding: 2rem 2rem 8rem;
+    }
   }
 </style>

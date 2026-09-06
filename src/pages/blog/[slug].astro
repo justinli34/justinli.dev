@@ -18,7 +18,7 @@ const { post } = Astro.props as Props;
 const { Content } = await render(post);
 ---
 
-<BaseLayout title={`${post.data.title} | Justin Li`}>
+<BaseLayout title={`${post.data.title} | Justin Li`} centered={false}>
   <article>
     <header>
       <h1>{post.data.title}</h1>

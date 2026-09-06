@@ -1,9 +1,11 @@
 :root {
   --color-bg: oklch(0.1 0 0);
   --color-fg: oklch(0.8 0 0);
-  --color-fg-strong: oklch(1 0 0);
+  --color-fg-strong: oklch(0.95 0 0);
   --color-muted: oklch(0.6 0 0);
+  --color-underline: oklch(0.55 0 0);
   --color-selection: oklch(0.35 0 0);
+  --color-border: oklch(0.35 0 0);
 
   font-family: Geist, system-ui;
   line-height: 1.5;
@@ -37,12 +39,22 @@ p {
 
 a {
   color: inherit;
-  text-decoration-color: var(--color-muted);
+  text-decoration-color: var(--color-underline);
+  text-underline-offset: 0.1em;
+  transition:
+    color 100ms ease,
+    text-decoration-color 100ms ease;
 }
 
 a:hover {
   color: var(--color-fg-strong);
-  text-decoration-color: var(--color-fg-strong);
+  text-decoration-color: var(--color-fg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  a {
+    transition: none;
+  }
 }
 
 ::selection {
