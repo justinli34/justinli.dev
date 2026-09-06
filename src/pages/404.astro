@@ -2,6 +2,25 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 ---
 
-<BaseLayout>
-  <p>Page not found.</p>
+<BaseLayout title="Page not found | Justin Li">
+  <section>
+    <h1>Page not found.</h1>
+    <a href="/">Home</a>
+  </section>
 </BaseLayout>
+
+<style>
+  section {
+    padding-top: 32px;
+  }
+
+  h1 {
+    margin-bottom: 20px;
+    font-size: 28px;
+    letter-spacing: -0.04em;
+  }
+
+  a {
+    font-size: 14px;
+  }
+</style>

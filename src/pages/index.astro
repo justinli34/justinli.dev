@@ -1,6 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 
+import ReededSky from "@/components/ReededSky.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 
 const externalLinks = [
@@ -16,75 +17,97 @@ const posts = (await getCollection("blog")).sort((first, second) =>
 ---
 
 <BaseLayout>
-  <section class="links" aria-label="Links">
-    <ul>
-      {externalLinks.map(([label, href]) => (
-          <li>
-            <a href={href} target="_blank" rel="noopener noreferrer">
-              {label}
-            </a>
-          </li>
-        ))}
-      <li>
-        <a href="mailto:justin@justinli.dev">justin@justinli.dev</a>
-      </li>
-    </ul>
-  </section>
-  <section aria-label="About">
-    <p class="about">
-      Hi, I'm Justin, a fourth-year CS student at UBC. I've previously interned
-      at Amazon and Ciena where I worked on an error classification engine for
-      accounting systems and AI agents for telecommunication and data center
-      networks. I'm interested in AI, distributed systems, and developer tools.
-      Outside of coding, I like to make music, play tennis, travel, and research
-      markets. I'm currently looking for full-time software engineering jobs.
-    </p>
-  </section>
+  <ReededSky />
 
-  <section class="posts" aria-label="Posts">
-    <ul>
-      {posts.map((post) => (
+  <div class="details">
+    <section id="about" aria-label="About">
+      <nav class="links" aria-label="Personal links">
+        {externalLinks.map(([label, href]) => (
+          <a href={href} target="_blank" rel="noopener noreferrer">{label}</a>
+        ))}
+        <a href="mailto:justin@justinli.dev">justin@justinli.dev</a>
+      </nav>
+      <p>
+        Hi, I’m Justin, a fourth-year CS student at UBC. I’ve previously
+        interned at Amazon and Ciena where I worked on an error classification
+        engine for accounting systems and AI agents for telecommunication and
+        data center networks. I’m interested in AI, distributed systems, and
+        developer tools. Outside of coding, I like to make music, play tennis,
+        travel, and research markets. I’m currently looking for full-time
+        software engineering jobs.
+      </p>
+    </section>
+
+    <section id="writing" aria-label="Writing">
+      <ul class="posts">
+        {posts.map((post) => (
           <li>
-            {post.data.date && (
-              <time datetime={post.data.date}>{post.data.date}</time>
-            )}
-            <a href={`/blog/${encodeURIComponent(post.id)}`}>
-              {post.data.title}
-            </a>
+            <time datetime={post.data.date}>{post.data.date}</time>
+            <a href={`/blog/${encodeURIComponent(post.id)}`}>{post.data.title}</a>
           </li>
         ))}
-    </ul>
-  </section>
+      </ul>
+    </section>
+  </div>
 </BaseLayout>
 
 <style>
-  .about {
+  .details {
+    display: grid;
+    grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+    gap: 80px;
+    margin-top: 24px;
+    font-size: 14px;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    margin-bottom: 22px;
+  }
+
+  p {
+    line-height: 1.85;
     text-wrap: pretty;
   }
 
-  ul {
+  .posts {
+    display: grid;
+    gap: 12px;
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .links ul {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-  }
-
-  .posts ul {
-    display: grid;
-    gap: 0.25rem;
-  }
-
   .posts li {
     display: flex;
-    gap: 0.75rem;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 18px;
+  }
+
+  .posts time {
+    color: var(--color-muted);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
   }
 
   .posts a {
     text-decoration: none;
+  }
+
+  @media (max-width: 900px) {
+    .details {
+      gap: 40px;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .details {
+      grid-template-columns: 1fr;
+      gap: 28px;
+      margin-top: 16px;
+    }
   }
 </style>
