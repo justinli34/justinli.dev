@@ -1,14 +1,8 @@
 ---
 import { getCollection } from "astro:content";
 
+import ReededSky from "@/components/ReededSky.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
-
-const externalLinks = [
-  ["LinkedIn", "https://www.linkedin.com/in/justinlibc"],
-  ["GitHub", "https://github.com/justinli34"],
-  ["YouTube", "https://www.youtube.com/@justinli34"],
-  ["X (Twitter)", "https://x.com/justinlidev"],
-] as const;
 
 const posts = (await getCollection("blog")).sort((first, second) =>
   second.data.date.localeCompare(first.data.date),
@@ -16,25 +10,40 @@ const posts = (await getCollection("blog")).sort((first, second) =>
 ---
 
 <BaseLayout>
-  <section class="links" aria-label="Links">
-    <ul>
-      {externalLinks.map(([label, href]) => (
-          <li>
-            <a href={href} target="_blank" rel="noopener noreferrer">
-              {label}
-            </a>
-          </li>
-        ))}
-    </ul>
-  </section>
+  <ReededSky />
+
   <section aria-label="About">
     <p class="about">
       Hi, I'm Justin, a fourth-year CS student at UBC. I've previously interned
       at Amazon and Ciena where I worked on an error classification engine for
       accounting systems and AI agents for telecom and data center networks. I'm
-      interested in AI, distributed systems, and developer tools. Outside of
-      coding, I like to make music, play tennis, and travel. Feel free to
-      message me on LinkedIn or X.
+      interested in AI, distributed systems, and developer tools. You can find
+      my projects on{" "}
+      <a
+        href="https://github.com/justinli34"
+        target="_blank"
+        rel="noopener noreferrer"
+        >GitHub</a
+      >. Outside of coding, I like to make{" "}
+      <a
+        href="https://www.youtube.com/@justinli34"
+        target="_blank"
+        rel="noopener noreferrer"
+        >music</a
+      >, play tennis, and travel. Feel free to message me on{" "}
+      <a
+        href="https://www.linkedin.com/in/justinlibc"
+        target="_blank"
+        rel="noopener noreferrer"
+        >LinkedIn</a
+      >
+      {" "}or{" "}
+      <a
+        href="https://x.com/justinlidev"
+        target="_blank"
+        rel="noopener noreferrer"
+        >X</a
+      >.
     </p>
   </section>
 
@@ -63,12 +72,6 @@ const posts = (await getCollection("blog")).sort((first, second) =>
     margin: 0;
     padding: 0;
     list-style: none;
-  }
-
-  .links ul {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
   }
 
   .posts {
