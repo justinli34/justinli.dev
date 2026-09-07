@@ -1,8 +1,26 @@
+---
+type Props = {
+  asHeading?: boolean;
+};
+
+const { asHeading = false } = Astro.props;
+---
+
 <header transition:name="site-header">
-  <a href="/">Justin Li</a>
+  {asHeading ? (
+      <h1>
+        <a href="/">Justin Li</a>
+      </h1>
+    ) : (
+      <a href="/">Justin Li</a>
+    )}
 </header>
 
 <style>
+  h1 {
+    font: inherit;
+  }
+
   a {
     position: relative;
     display: inline-flex;
