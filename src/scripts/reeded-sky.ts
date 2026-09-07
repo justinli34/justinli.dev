@@ -1,6 +1,11 @@
+import { selectTheme } from "./theme";
+
 // An original light study: a procedural cloudscape seen through cylindrical reeds.
 // Keep the artwork hidden unless WebGL initializes.
 const STRIPE_WIDTH_PX = 31;
+const SLICE_FADE_MS = 400;
+
+type SliceFade = { from: number; to: number; started: number };
 const vertexSource = `
 attribute vec2 a_position;
 void main() { gl_Position = vec4(a_position, 0.0, 1.0); }
@@ -10,7 +15,7 @@ const fragmentSource = `
 precision highp float;
 uniform vec2 u_resolution;
 uniform float u_time;
-uniform float u_night;
+uniform sampler2D u_slice_nights;
 uniform float u_reeds;
 uniform vec2 u_pointer;
 
@@ -47,11 +52,11 @@ float clouds(vec2 p) {
   return smoothstep(0.10, 0.57, shape + (billow - 0.5) * 1.35 + (detail - 0.5) * 0.26);
 }
 
-vec3 sky(vec2 uv) {
+vec3 sky(vec2 uv, float nightAmount) {
   float height = clamp(uv.y, 0.0, 1.0);
   vec3 day = mix(vec3(0.64, 0.81, 0.79), vec3(0.16, 0.48, 0.67), pow(height, 0.75));
   vec3 night = mix(vec3(0.16, 0.28, 0.34), vec3(0.025, 0.065, 0.14), height);
-  vec3 color = mix(day, night, u_night);
+  vec3 color = mix(day, night, nightAmount);
   vec2 p = vec2(uv.x * 4.4, uv.y * 1.65);
   p.x += sin(u_time * 0.022) * 0.6;
   p.y += sin(u_time * 0.017) * 0.045;
@@ -60,18 +65,19 @@ vec3 sky(vec2 uv) {
   float light = clamp(0.72 + (cloud - shade) * 1.9, 0.0, 1.0);
   vec3 dayCloud = mix(vec3(0.54, 0.70, 0.73), vec3(1.0, 0.985, 0.91), light);
   vec3 nightCloud = mix(vec3(0.16, 0.23, 0.31), vec3(0.51, 0.61, 0.69), light);
-  color = mix(color, mix(dayCloud, nightCloud, u_night), cloud * 0.96);
+  color = mix(color, mix(dayCloud, nightCloud, nightAmount), cloud * 0.96);
 
   // Diffuse sunlight / moonlight, rather than a hard disc behind the glass.
   vec2 glowPosition = uv - vec2(0.78, 0.8);
   float glow = exp(-dot(glowPosition * vec2(1.0, 0.8), glowPosition * vec2(1.0, 0.8)) * 17.0);
-  color += glow * mix(vec3(0.11, 0.105, 0.065), vec3(0.08, 0.105, 0.13), u_night);
+  color += glow * mix(vec3(0.11, 0.105, 0.065), vec3(0.08, 0.105, 0.13), nightAmount);
   return color;
 }
 
 void main() {
   vec2 uv = gl_FragCoord.xy / u_resolution;
   float cell = floor(uv.x * u_reeds);
+  float nightAmount = texture2D(u_slice_nights, vec2((cell + 0.5) / u_reeds, 0.5)).r;
   float local = fract(uv.x * u_reeds);
   float x = local * 2.0 - 1.0;
   float seed = hash(vec2(cell, 8.4));
@@ -84,13 +90,13 @@ void main() {
   sampleUV.x += ray.x / max(-ray.z, 0.2) * 0.055;
   sampleUV.y += sin(local * 3.14159) * 0.009 + waviness * 0.035;
   sampleUV += u_pointer * vec2(0.012, 0.007);
-  vec3 color = sky(sampleUV);
+  vec3 color = sky(sampleUV, nightAmount);
 
   float edge = pow(abs(x), 9.0);
   float fresnel = 0.035 + 0.6 * pow(1.0 - normal.z, 3.0);
   color *= 1.0 - edge * 0.22;
   color *= vec3(0.94, 0.99, 0.985);
-  color = mix(color, mix(vec3(0.56, 0.77, 0.79), vec3(0.18, 0.3, 0.39), u_night), fresnel);
+  color = mix(color, mix(vec3(0.56, 0.77, 0.79), vec3(0.18, 0.3, 0.39), nightAmount), fresnel);
 
   // Narrow reflected light and its neighboring trough make each flute read as glass.
   float highlight = exp(-pow((local - 0.87 - waviness * 0.4) / 0.035, 2.0));
@@ -98,8 +104,8 @@ void main() {
   float trough = exp(-pow((local - 0.965) / 0.028, 2.0));
   float sheen = 0.7 + 0.3 * sin(uv.y * 3.0 + seed * 0.4);
   color += (highlight * 0.24 + secondary * 0.075) * sheen
-           * mix(vec3(0.76, 0.96, 0.93), vec3(0.28, 0.48, 0.6), u_night);
-  color -= trough * mix(vec3(0.09, 0.14, 0.14), vec3(0.025, 0.045, 0.06), u_night);
+           * mix(vec3(0.76, 0.96, 0.93), vec3(0.28, 0.48, 0.6), nightAmount);
+  color -= trough * mix(vec3(0.09, 0.14, 0.14), vec3(0.025, 0.045, 0.06), nightAmount);
   color += vec3(0.018, 0.006, -0.009) * highlight;
   float vignette = 1.0 - 0.13 * pow(length((uv - 0.5) * vec2(0.8, 1.1)), 1.6);
   color *= vignette;
@@ -111,7 +117,8 @@ void main() {
 export function initReededSky() {
   const canvas = document.querySelector<HTMLCanvasElement>(".sky-canvas");
   const mount = document.querySelector<HTMLElement>(".sky-window");
-  if (!canvas || !mount) return;
+  const controls = mount?.querySelector<HTMLElement>(".sky-slices");
+  if (!canvas || !mount || !controls) return;
 
   const gl = canvas.getContext("webgl", {
     alpha: false,
@@ -166,7 +173,22 @@ export function initReededSky() {
   gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
   const resolution = gl.getUniformLocation(program, "u_resolution");
   const time = gl.getUniformLocation(program, "u_time");
-  const night = gl.getUniformLocation(program, "u_night");
+  const sliceNights = gl.createTexture();
+  if (!sliceNights) {
+    gl.deleteBuffer(buffer);
+    gl.deleteProgram(program);
+    return;
+  }
+  gl.bindTexture(gl.TEXTURE_2D, sliceNights);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+  gl.uniform1i(gl.getUniformLocation(program, "u_slice_nights"), 0);
+  let nights = new Uint8Array(0);
+  let sliceFades: SliceFade[] = [];
+  let renderedNights = new Uint8Array(0);
   const reeds = gl.getUniformLocation(program, "u_reeds");
   const pointer = gl.getUniformLocation(program, "u_pointer");
 
@@ -183,19 +205,38 @@ export function initReededSky() {
   let targetX = 0;
   let targetY = 0;
 
+  function sampleFade(fade: SliceFade, now: number) {
+    if (paused) return fade.to;
+    const progress = Math.min(
+      1,
+      Math.max(0, (now - fade.started) / SLICE_FADE_MS),
+    );
+    const eased = progress * progress * (3 - 2 * progress);
+    return fade.from + (fade.to - fade.from) * eased;
+  }
+
   function draw() {
     if (!gl || !canvas || lost || disposed) return;
+    const now = performance.now();
+    sliceFades.forEach((fade, index) => {
+      renderedNights[index] = Math.round(sampleFade(fade, now));
+    });
+    gl.bindTexture(gl.TEXTURE_2D, sliceNights);
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.LUMINANCE,
+      renderedNights.length,
+      1,
+      0,
+      gl.LUMINANCE,
+      gl.UNSIGNED_BYTE,
+      renderedNights,
+    );
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.uniform2f(resolution, canvas.width, canvas.height);
     gl.uniform1f(time, elapsed);
-    gl.uniform1f(
-      night,
-      document.documentElement.dataset.theme === "dark" ? 1 : 0,
-    );
-    gl.uniform1f(
-      reeds,
-      Math.max(1, Math.round((mount?.clientWidth ?? 960) / STRIPE_WIDTH_PX)),
-    );
+    gl.uniform1f(reeds, nights.length);
     gl.uniform2f(pointer, pointerX, pointerY);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
@@ -225,6 +266,34 @@ export function initReededSky() {
     }
   }
 
+  function updateSlices() {
+    if (!gl || !controls || lost || disposed) return;
+    const now = performance.now();
+    sliceFades.forEach((fade, index) => {
+      if (fade.to === nights[index]) return;
+      // Reverse from the current shade, rather than snapping to an endpoint.
+      fade.from = sampleFade(fade, now);
+      fade.to = nights[index];
+      fade.started = now;
+    });
+    Array.from(controls.children).forEach((button, index) => {
+      button.setAttribute("aria-pressed", String(nights[index] === 255));
+    });
+    draw();
+  }
+
+  function syncSiteTheme() {
+    // Start the site fade immediately when all slices match.
+    if (
+      lost ||
+      disposed ||
+      !nights.length ||
+      !nights.every((value) => value === nights[0])
+    )
+      return;
+    selectTheme(nights[0] === 255 ? "dark" : "light");
+  }
+
   function resize() {
     if (!canvas || !mount || disposed) return;
     const { width, height } = mount.getBoundingClientRect();
@@ -235,6 +304,37 @@ export function initReededSky() {
     );
     canvas.width = Math.max(1, Math.round(width * scale));
     canvas.height = Math.max(1, Math.round(height * scale));
+    const count = Math.max(1, Math.round(mount.clientWidth / STRIPE_WIDTH_PX));
+    if (count !== nights.length && controls) {
+      const oldNights = nights;
+      const oldFades = sliceFades;
+      const initialNight =
+        document.documentElement.dataset.theme === "dark" ? 255 : 0;
+      // Preserve the spatial pattern when the responsive glass changes size.
+      nights = Uint8Array.from({ length: count }, (_, index) =>
+        oldNights.length
+          ? oldNights[Math.floor(((index + 0.5) * oldNights.length) / count)]
+          : initialNight,
+      );
+      sliceFades = Array.from({ length: count }, (_, index) => {
+        const oldFade =
+          oldFades[Math.floor(((index + 0.5) * oldFades.length) / count)];
+        return oldFade
+          ? { ...oldFade }
+          : { from: nights[index], to: nights[index], started: 0 };
+      });
+      renderedNights = new Uint8Array(count);
+      const buttons = Array.from({ length: count }, (_, index) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.dataset.slice = String(index);
+        button.setAttribute("aria-label", `Slice ${index + 1} night mode`);
+        return button;
+      });
+      controls.replaceChildren(...buttons);
+      updateSlices();
+      if (oldNights.length) syncSiteTheme();
+    }
     draw();
   }
 
@@ -244,6 +344,12 @@ export function initReededSky() {
     "change",
     () => {
       paused = reducedMotion.matches;
+      if (paused) {
+        sliceFades.forEach((fade) => {
+          fade.from = fade.to;
+        });
+        syncSiteTheme();
+      }
       pointerX = pointerY = targetX = targetY = 0;
       draw();
       syncAnimation();
@@ -268,7 +374,126 @@ export function initReededSky() {
     },
     options,
   );
-  document.addEventListener("themechange", draw, options);
+  let dragPointer: number | null = null;
+  let dragNight = 0;
+  let previousSlice: number | null = null;
+
+  function sliceAtPointer(event: PointerEvent) {
+    const rect = controls?.getBoundingClientRect();
+    if (!rect?.width || event.clientY < rect.top || event.clientY > rect.bottom)
+      return null;
+    return Math.max(
+      0,
+      Math.min(
+        nights.length - 1,
+        Math.floor(((event.clientX - rect.left) / rect.width) * nights.length),
+      ),
+    );
+  }
+
+  function paintTo(index: number) {
+    const start = previousSlice ?? index;
+    let changed = false;
+    // Fill skipped slices too, even when a quick swipe has few pointer events.
+    for (let i = Math.min(start, index); i <= Math.max(start, index); i++) {
+      if (nights[i] === dragNight) continue;
+      nights[i] = dragNight;
+      changed = true;
+    }
+    previousSlice = index;
+    if (changed) {
+      updateSlices();
+      syncSiteTheme();
+    }
+  }
+
+  function endDrag() {
+    const pointerId = dragPointer;
+    dragPointer = previousSlice = null;
+    if (pointerId !== null && controls?.hasPointerCapture(pointerId)) {
+      controls.releasePointerCapture(pointerId);
+    }
+  }
+
+  controls.addEventListener(
+    "pointerdown",
+    (event) => {
+      if (
+        lost ||
+        disposed ||
+        !event.isPrimary ||
+        event.button !== 0 ||
+        dragPointer !== null
+      )
+        return;
+      const index = sliceAtPointer(event);
+      if (index === null) return;
+      dragPointer = event.pointerId;
+      dragNight = nights[index] ? 0 : 255;
+      previousSlice = null;
+      controls.setPointerCapture(event.pointerId);
+      paintTo(index);
+    },
+    options,
+  );
+  controls.addEventListener(
+    "pointermove",
+    (event) => {
+      if (event.pointerId !== dragPointer || lost || disposed) return;
+      if (!(event.buttons & 1)) {
+        endDrag();
+        return;
+      }
+      const index = sliceAtPointer(event);
+      if (index === null) previousSlice = null;
+      else paintTo(index);
+    },
+    options,
+  );
+  for (const type of [
+    "pointerup",
+    "pointercancel",
+    "lostpointercapture",
+  ] as const) {
+    controls.addEventListener(
+      type,
+      (event) => {
+        if (event.pointerId === dragPointer) endDrag();
+      },
+      options,
+    );
+  }
+  window.addEventListener("blur", endDrag, options);
+  window.addEventListener("resize", endDrag, options);
+
+  controls.addEventListener(
+    "click",
+    (event) => {
+      // Pointer gestures are handled above; keep keyboard/assistive clicks working.
+      if (
+        event.detail !== 0 ||
+        lost ||
+        disposed ||
+        !(event.target instanceof HTMLButtonElement)
+      )
+        return;
+      const index = Number(event.target.dataset.slice);
+      if (!Number.isInteger(index) || index < 0 || index >= nights.length)
+        return;
+      nights[index] = nights[index] ? 0 : 255;
+      updateSlices();
+      syncSiteTheme();
+    },
+    options,
+  );
+  document.addEventListener(
+    "themechange",
+    () => {
+      nights.fill(document.documentElement.dataset.theme === "dark" ? 255 : 0);
+      updateSlices();
+    },
+    options,
+  );
   document.addEventListener("visibilitychange", syncAnimation, options);
   window.addEventListener("resize", resize, { ...options, passive: true });
   canvas.addEventListener(
@@ -290,11 +515,14 @@ export function initReededSky() {
   intersectionObserver.observe(mount);
 
   function dispose() {
+    endDrag();
     disposed = true;
     cancelAnimationFrame(animationFrame);
     controller.abort();
     resizeObserver.disconnect();
     intersectionObserver.disconnect();
+    gl?.deleteTexture(sliceNights);
+    controls?.replaceChildren();
     gl?.deleteBuffer(buffer);
     gl?.deleteProgram(program);
   }

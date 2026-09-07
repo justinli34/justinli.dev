@@ -1,3 +1,58 @@
+/* Typed, inherited colors let the whole page share one theme animation. */
+@property --color-bg {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #f9f9f6;
+}
+
+@property --color-fg {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #565e60;
+}
+
+@property --color-fg-strong {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #232b2d;
+}
+
+@property --color-muted {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #697274;
+}
+
+@property --color-line {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #dcdfda;
+}
+
+@property --color-selection {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #d1e5e8;
+}
+
+@property --color-accent {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #347a70;
+}
+
+@property --color-sky-bg {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #70abb9;
+}
+
+@property --color-sky-border {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #709b9f;
+}
+
 :root {
   color-scheme: light;
   --color-bg: #f9f9f6;
@@ -7,6 +62,8 @@
   --color-line: #dcdfda;
   --color-selection: #d1e5e8;
   --color-accent: #347a70;
+  --color-sky-bg: #70abb9;
+  --color-sky-border: #709b9f;
   --page-width: 900px;
 
   font-family: "Geist", system-ui, sans-serif;
@@ -28,6 +85,8 @@
   --color-line: #303b3d;
   --color-selection: #30535e;
   --color-accent: #92c7b7;
+  --color-sky-bg: #142d43;
+  --color-sky-border: #35474e;
 }
 
 * {
@@ -145,5 +204,25 @@ button {
     transition: none !important;
     /* biome-ignore lint/complexity/noImportantStyles: Accessibility override must win over component styles. */
     scroll-behavior: auto !important;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-theme-transition] {
+    transition:
+      --color-bg 250ms ease-in-out,
+      --color-fg 250ms ease-in-out,
+      --color-fg-strong 250ms ease-in-out,
+      --color-muted 250ms ease-in-out,
+      --color-line 250ms ease-in-out,
+      --color-selection 250ms ease-in-out,
+      --color-accent 250ms ease-in-out,
+      --color-sky-bg 250ms ease-in-out,
+      --color-sky-border 250ms ease-in-out;
+  }
+
+  /* Follow the animated palette directly, without a second hover-color fade. */
+  :root[data-theme-transition] a {
+    transition: none;
   }
 }

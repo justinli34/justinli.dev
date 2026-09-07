@@ -4,62 +4,7 @@ const isHome = Astro.url.pathname === "/";
 
 <header class="site-header">
   {isHome ? <h1>Justin Li</h1> : <a class="identity" href="/">Justin Li</a>}
-  <button
-    class="theme-toggle"
-    type="button"
-    aria-label="Night mode"
-    aria-pressed="false"
-    hidden
-  >
-    <svg
-      class="theme-icon"
-      width="15"
-      height="15"
-      viewBox="0 0 20 20"
-      fill="none"
-      aria-hidden="true"
-    >
-      <circle cx="10" cy="10" r="6.5" stroke="currentColor" />
-      <path d="M10 3.5a6.5 6.5 0 0 1 0 13z" fill="currentColor" />
-    </svg>
-  </button>
 </header>
-
-<script>
-  const toggle = document.querySelector<HTMLButtonElement>(".theme-toggle");
-  const systemTheme = matchMedia("(prefers-color-scheme: dark)");
-  let selectedTheme: string | null = null;
-  try {
-    const saved = localStorage.getItem("justinli-theme");
-    if (saved === "dark" || saved === "light") selectedTheme = saved;
-  } catch {}
-
-  function applyTheme(theme: string) {
-    const dark = theme === "dark";
-    document.documentElement.dataset.theme = theme;
-    toggle?.setAttribute("aria-pressed", String(dark));
-    if (toggle)
-      toggle.title = dark ? "Switch to light mode" : "Switch to dark mode";
-    document
-      .querySelector('meta[name="theme-color"]')
-      ?.setAttribute("content", dark ? "#111719" : "#f9f9f6");
-    document.dispatchEvent(new Event("themechange"));
-  }
-
-  applyTheme(selectedTheme ?? (systemTheme.matches ? "dark" : "light"));
-  if (toggle) toggle.hidden = false;
-  toggle?.addEventListener("click", () => {
-    selectedTheme =
-      document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-    applyTheme(selectedTheme);
-    try {
-      localStorage.setItem("justinli-theme", selectedTheme);
-    } catch {}
-  });
-  systemTheme.addEventListener("change", (event) => {
-    if (selectedTheme === null) applyTheme(event.matches ? "dark" : "light");
-  });
-</script>
 
 <style>
   .site-header {
@@ -80,32 +25,6 @@ const isHome = Astro.url.pathname === "/";
     color: var(--color-fg-strong);
     font-size: 16px;
     text-decoration: none;
-  }
-
-  .theme-toggle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    margin-right: -14px;
-    padding: 0;
-    border: 0;
-    background: none;
-    color: var(--color-muted);
-    cursor: pointer;
-  }
-
-  .theme-toggle[hidden] {
-    display: none;
-  }
-
-  .theme-toggle:hover {
-    color: var(--color-fg-strong);
-  }
-
-  .theme-toggle[aria-pressed="true"] .theme-icon {
-    transform: rotate(180deg);
   }
 
   @media (max-width: 700px) {

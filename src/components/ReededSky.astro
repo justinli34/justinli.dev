@@ -1,12 +1,12 @@
-<div
+<fieldset
   class="sky-window"
-  role="img"
-  aria-label="Clouds and light refracted through vertical, reeded glass."
+  aria-label="Reeded glass sky. Click a slice to toggle day and night, or hold and drag to paint multiple slices. Match all slices to change the site theme."
   hidden
 >
   <canvas class="sky-canvas" aria-hidden="true"></canvas>
+  <div class="sky-slices"></div>
   <div class="glass-edge" aria-hidden="true"></div>
-</div>
+</fieldset>
 
 <script>
   import { initReededSky } from "@/scripts/reeded-sky";
@@ -17,15 +17,19 @@
 <style>
   .sky-window {
     position: relative;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
     height: clamp(260px, 28vw, 340px);
     overflow: hidden;
     isolation: isolate;
-    background: #70abb9;
-    border: 1px solid #709b9f;
+    background: var(--color-sky-bg);
+    border: 1px solid var(--color-sky-border);
     border-radius: 3px;
   }
 
   .sky-canvas,
+  .sky-slices,
   .glass-edge {
     position: absolute;
     inset: 0;
@@ -33,13 +37,30 @@
     height: 100%;
   }
 
-  :global([data-theme="dark"]) .sky-window {
-    border-color: #35474e;
-    background: #142d43;
-  }
-
   .sky-canvas {
     display: block;
+  }
+
+  .sky-slices {
+    display: flex;
+    touch-action: none;
+    user-select: none;
+  }
+
+  .sky-slices :global(button) {
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .sky-slices :global(button:focus-visible) {
+    outline: 2px solid #fff;
+    outline-offset: -3px;
+    box-shadow: inset 0 0 0 4px #142d43;
   }
 
   .glass-edge {
