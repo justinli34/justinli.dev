@@ -96,7 +96,8 @@ const {
     display: flex;
     flex-direction: column;
     max-width: 700px;
-    min-height: 100dvh;
+    /* Keep layout stable while mobile browser bars expand/collapse. */
+    min-height: 100svh;
     gap: 1rem;
     margin: 0 auto;
     padding: 4rem 2rem 2rem;
@@ -116,13 +117,13 @@ const {
   }
 
   :global(html[data-glass-intro]) .content-anchor {
-    top: var(--intro-distance, 100dvh);
+    top: var(--intro-distance, 100svh);
   }
 
   :global(html[data-glass-intro]) .glass-intro::after {
     content: "";
     display: block;
-    height: var(--intro-distance, 100dvh);
+    height: var(--intro-distance, 100svh);
   }
 
   :global(html[data-glass-intro]) .glass-intro .page {

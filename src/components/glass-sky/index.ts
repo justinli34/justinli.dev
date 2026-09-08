@@ -83,7 +83,10 @@ function mountGlassSky(
     const bounds = shell.getBoundingClientRect();
     // Fixed positioning starts inside the root's reserved scrollbar gutter.
     fixedOrigin = root.getBoundingClientRect().left;
-    const height = window.innerHeight;
+    // The page's 100svh minimum resolves to pixels and stays stable as mobile
+    // browser bars collapse. Unlike innerHeight, it won't shift the artwork or
+    // scroll progress mid-gesture, but still updates on rotation/window resize.
+    const height = Number.parseFloat(getComputedStyle(page).minHeight);
     const padding = Math.max(32, Math.min(bounds.width, height) * 0.076);
     const width = Math.max(1, bounds.width - padding * 2);
     const availableHeight = Math.max(1, height - padding * 2.2);
