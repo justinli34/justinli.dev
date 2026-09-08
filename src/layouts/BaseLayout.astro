@@ -8,12 +8,14 @@ type Props = {
   title?: string;
   centered?: boolean;
   headerAsHeading?: boolean;
+  glassIntro?: boolean;
 };
 
 const {
   title = "Justin Li",
   centered = true,
   headerAsHeading = false,
+  glassIntro = false,
 } = Astro.props;
 ---
 
@@ -31,17 +33,48 @@ const {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
     <ClientRouter fallback="none" />
+    <script is:inline define:vars={{ glassIntro }}>
+      document.documentElement.toggleAttribute(
+        "data-glass-intro",
+        glassIntro &&
+          !window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+      );
+    </script>
   </head>
 
   <body>
-    <div class:list={["page", { centered }]}>
-      <Header asHeading={headerAsHeading} />
-      <main>
-        <slot />
-      </main>
+    <div class:list={["page-shell", { "glass-intro": glassIntro }]}>
+      {glassIntro && <div id="home-content" class="content-anchor" aria-hidden="true"></div>}
+      <div class:list={["page", { centered }]}>
+        <Header asHeading={headerAsHeading} />
+        <main id="main-content" tabindex="-1">
+          <slot />
+        </main>
+      </div>
     </div>
   </body>
 </html>
+
+<script>
+  import type { TransitionBeforeSwapEvent } from "astro:transitions/client";
+
+  function prepareIntro(event: TransitionBeforeSwapEvent) {
+    // Run on every route, including a first visit to a blog post. The destination
+    // anchor and scroll runway must exist before Astro restores scroll position.
+    event.newDocument.documentElement.toggleAttribute(
+      "data-glass-intro",
+      !!event.newDocument.querySelector(".glass-intro") &&
+        !matchMedia("(prefers-reduced-motion: reduce)").matches,
+    );
+  }
+
+  document.addEventListener("astro:before-swap", prepareIntro);
+  if (import.meta.hot) {
+    import.meta.hot.dispose(() => {
+      document.removeEventListener("astro:before-swap", prepareIntro);
+    });
+  }
+</script>
 
 <style>
   :global(:root) {
@@ -67,7 +100,47 @@ const {
     padding: 4rem 2rem 2rem;
   }
 
+  .glass-intro {
+    position: relative;
+  }
+
+  .content-anchor {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
+  }
+
+  :global(html[data-glass-intro]) .content-anchor {
+    top: var(--intro-distance, 100dvh);
+  }
+
+  :global(html[data-glass-intro]) .glass-intro::after {
+    content: "";
+    display: block;
+    height: var(--intro-distance, 100dvh);
+  }
+
+  :global(html[data-glass-intro]) .glass-intro .page {
+    position: sticky;
+    top: 0;
+  }
+
+  :global(html[data-glass-intro]) .glass-intro :global(header),
+  :global(html[data-glass-intro]) .glass-intro :global(main > section) {
+    opacity: var(--content-reveal, 0);
+    visibility: var(--content-visibility, hidden);
+    transform: translateY(var(--content-offset, 18px));
+  }
+
+  :global(html[data-glass-intro]) .glass-intro :global(header) {
+    transform: translateY(var(--header-offset, -8px));
+  }
+
   main {
+    outline: none;
     display: flex;
     flex-direction: column;
     gap: 1rem;

@@ -1,0 +1,73 @@
+<figure
+  class="glass-sky"
+  role="img"
+  aria-label="Sunlit cast-glass blocks with clouds drifting behind them, merging into one pane as you scroll."
+>
+  <canvas class="glass-canvas" aria-hidden="true"></canvas>
+</figure>
+<a class="skip-intro" href="#main-content">Skip to content</a>
+
+<script>
+  import { initGlassSky } from "./glass-sky";
+
+  document.addEventListener("astro:page-load", initGlassSky);
+
+  if (import.meta.hot) {
+    import.meta.hot.dispose(() => {
+      document.removeEventListener("astro:page-load", initGlassSky);
+    });
+  }
+</script>
+
+<style>
+  .glass-sky {
+    position: relative;
+    height: 200px;
+    flex-shrink: 0;
+    margin: 0;
+    border-radius: 3px;
+    background: url("/glass-sky.webp") center / cover no-repeat;
+  }
+
+  .glass-sky[data-rendered] {
+    background: none;
+  }
+
+  .glass-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: block;
+    pointer-events: none;
+    visibility: hidden;
+    z-index: 1;
+  }
+
+  .glass-sky[data-rendered] .glass-canvas {
+    visibility: visible;
+  }
+
+  :global(html[data-glass-intro]) .glass-sky {
+    background: none;
+  }
+
+  .skip-intro {
+    position: fixed;
+    z-index: 2;
+    left: 50%;
+    bottom: 1.5rem;
+    transform: translate(-50%, 150%);
+    opacity: 0;
+    pointer-events: none;
+    padding: 0.5rem 0.75rem;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 3px;
+  }
+
+  .skip-intro:focus-visible {
+    transform: translate(-50%, 0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+</style>

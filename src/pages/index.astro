@@ -1,7 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 
-import ReededSky from "@/components/ReededSky.astro";
+import GlassSky from "@/components/GlassSky.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 
 const posts = (await getCollection("blog")).sort((first, second) =>
@@ -9,8 +9,8 @@ const posts = (await getCollection("blog")).sort((first, second) =>
 );
 ---
 
-<BaseLayout headerAsHeading>
-  <ReededSky />
+<BaseLayout headerAsHeading glassIntro>
+  <GlassSky />
 
   <section aria-label="About">
     <p class="about">
