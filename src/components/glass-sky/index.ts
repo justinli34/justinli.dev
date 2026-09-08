@@ -1,4 +1,5 @@
 import { createGlassRenderer } from "./renderer";
+import { skyAspect } from "./shaders";
 
 const clamp = (value: number) => Math.max(0, Math.min(1, value));
 const ease = (value: number) => {
@@ -47,6 +48,7 @@ function mountGlassSky(
   let dirty = true;
   let last = 0;
   let elapsed = 0;
+  let skySpeed = 1;
   let distance = 1;
   let columns = 6;
   let rows = 4;
@@ -59,14 +61,21 @@ function mountGlassSky(
   let targetY = 0;
   let pointerX = 0;
   let pointerY = 0;
+  let rendered = false;
+  let revealed = -1;
 
   function reveal(value: number) {
+    if (value === revealed) return;
+    revealed = value;
     shell.style.setProperty("--content-reveal", String(value));
     shell.style.setProperty(
       "--content-visibility",
       value > 0 ? "visible" : "hidden",
     );
-    for (const element of content) element.inert = value < 0.1;
+    const inert = value < 0.1;
+    for (const element of content) {
+      if (element.inert !== inert) element.inert = inert;
+    }
   }
 
   function measure() {
@@ -107,6 +116,12 @@ function mountGlassSky(
     const top = start.top + (target.top - start.top) * amount;
     const width = start.width + (target.width - start.width) * amount;
     const height = start.height + (target.height - start.height) * amount;
+    // The shader uses a cover crop: max(width, height * skyAspect) is the
+    // displayed width of the full sky. Compensate for its shrinkage in CSS
+    // pixels, independently of devicePixelRatio and backing-buffer quantization.
+    skySpeed =
+      Math.max(start.width, start.height * skyAspect) /
+      Math.max(width, height * skyAspect);
     canvas.style.transform = `translate3d(${left - fixedOrigin}px, ${top}px, 0)`;
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
@@ -122,7 +137,7 @@ function mountGlassSky(
     if (canvas.width !== bufferWidth) canvas.width = bufferWidth;
     if (canvas.height !== bufferHeight) canvas.height = bufferHeight;
     visible = top + height > 0 && top < window.innerHeight;
-    const contentReveal = intro ? ease((progress - 0.65) / 0.35) : 1;
+    const contentReveal = intro ? ease((progress - 0.65) / (0.86 - 0.65)) : 1;
     reveal(contentReveal);
     // Keep emerging text outside the artwork until it reaches its final bounds.
     shell.style.setProperty(
@@ -148,7 +163,9 @@ function mountGlassSky(
     // Scroll geometry tracks every animation frame; the ambient sky runs at 30fps.
     if (visible && (needsLayout || (!reduced && now - last >= 1000 / 30))) {
       if (!reduced) {
-        elapsed += Math.min(now - (last || now), 100) / 1000;
+        // Scale the clock's increments, not its accumulated value, so scrolling
+        // and resizing change velocity without jumping the cloud position.
+        elapsed += (Math.min(now - (last || now), 100) / 1000) * skySpeed;
         pointerX += (targetX - pointerX) * 0.06;
         pointerY += (targetY - pointerY) * 0.06;
       }
@@ -162,7 +179,11 @@ function mountGlassSky(
         reduced ? 0 : pointerY,
         aspect,
       );
-      mount.dataset.rendered = "";
+      // This attribute changes canvas/background visibility only on the first draw.
+      if (!rendered) {
+        mount.dataset.rendered = "";
+        rendered = true;
+      }
     }
     if (visible && !reduced) frameId = requestAnimationFrame(frame);
   }

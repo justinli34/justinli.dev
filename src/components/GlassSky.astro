@@ -22,11 +22,17 @@
 <style>
   .glass-sky {
     position: relative;
-    height: 200px;
+    height: 150px;
     flex-shrink: 0;
     margin: 0;
     border-radius: 3px;
     background: url("/glass-sky.webp") center / cover no-repeat;
+  }
+
+  @media (min-width: 768px) {
+    .glass-sky {
+      height: 200px;
+    }
   }
 
   .glass-sky[data-rendered] {

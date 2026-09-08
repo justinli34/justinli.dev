@@ -1,5 +1,7 @@
 // Adapted from ~/Projects/glass-sky: the same cast-glass optics and volumetric sky,
 // rendered with WebGL 2 so the artwork doesn't require WebGPU.
+export const skyAspect = 11 / 7.5;
+
 export const vertexSource = `#version 300 es
 void main() {
   vec2 p = vec2((gl_VertexID << 1) & 2, gl_VertexID & 2);
@@ -56,7 +58,11 @@ float density(vec3 p) {
   d = max(d, ellipsoid(p,vec3(1.65,-2.3,.08),vec3(1.62,.24,.4)));
   d = max(d, ellipsoid(p,vec3(1.77,-2.1,-.04),vec3(.4,.4,.4)));
   d = max(d, ellipsoid(p,vec3(-3.4,2.3,.05),vec3(1.22,.23,.43)));
-  return max(0.,d+(fbm3(p*3.7)-.5)*.72)*6.;
+  // fbm3 is bounded by 0..1, so noise cannot add more than .36.
+  // Avoid five noise octaves wherever the density is guaranteed to be zero.
+  float n = 0.;
+  if (d > -.36) n = fbm3(p*3.7);
+  return max(0.,d+(n-.5)*.72)*6.;
 }
 void main() {
   vec2 uv = gl_FragCoord.xy / u_resolution;
@@ -164,7 +170,7 @@ void main() {
                   + imperfections + faceBulge;
   // Cover the pane rather than stretching the cloudscape as its shape changes.
   // The sky's world-space extent is 11 by 7.5, independent of texture resolution.
-  float skyAspect = 11./7.5;
+  float skyAspect = ${skyAspect};
   vec2 skyCrop = vec2(min(1.,aspect/skyAspect),min(1.,skyAspect/aspect));
   vec2 skyUV = (screen-.5)*skyCrop*.83+vec2(.5);
   vec2 refractionScale = skyCrop/(ratio*zoomOut);

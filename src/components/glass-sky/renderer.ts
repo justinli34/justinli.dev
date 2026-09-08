@@ -99,6 +99,12 @@ export function createGlassRenderer(canvas: HTMLCanvasElement) {
     const morph = gl.getUniformLocation(glassProgram, "u_morph");
     const pointer = gl.getUniformLocation(glassProgram, "u_pointer");
     const aspect = gl.getUniformLocation(glassProgram, "u_aspect");
+    let bufferWidth = 0;
+    let bufferHeight = 0;
+    let lastColumns = 0;
+    let lastRows = 0;
+    let lastProgress = -1;
+    let lastRatio = 0;
 
     return {
       draw(
@@ -110,13 +116,29 @@ export function createGlassRenderer(canvas: HTMLCanvasElement) {
         y: number,
         ratio: number,
       ) {
-        gl.viewport(0, 0, canvas.width, canvas.height);
-        gl.uniform2f(resolution, canvas.width, canvas.height);
-        gl.uniform2f(grid, columns, rows);
+        // Ambient frames only change time and light direction. WebGL retains
+        // viewport/uniform state, including when the backing buffer is resized.
+        if (canvas.width !== bufferWidth || canvas.height !== bufferHeight) {
+          bufferWidth = canvas.width;
+          bufferHeight = canvas.height;
+          gl.viewport(0, 0, bufferWidth, bufferHeight);
+          gl.uniform2f(resolution, bufferWidth, bufferHeight);
+        }
+        if (columns !== lastColumns || rows !== lastRows) {
+          gl.uniform2f(grid, columns, rows);
+          lastColumns = columns;
+          lastRows = rows;
+        }
+        if (progress !== lastProgress) {
+          gl.uniform1f(morph, progress);
+          lastProgress = progress;
+        }
+        if (ratio !== lastRatio) {
+          gl.uniform1f(aspect, ratio);
+          lastRatio = ratio;
+        }
         gl.uniform1f(time, elapsed);
-        gl.uniform1f(morph, progress);
         gl.uniform2f(pointer, x, y);
-        gl.uniform1f(aspect, ratio);
         gl.drawArrays(gl.TRIANGLES, 0, 3);
       },
       dispose,
