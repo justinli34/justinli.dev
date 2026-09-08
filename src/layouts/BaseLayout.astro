@@ -44,7 +44,9 @@ const {
 
   <body>
     <div class:list={["page-shell", { "glass-intro": glassIntro }]}>
-      {glassIntro && <div id="home-content" class="content-anchor" aria-hidden="true"></div>}
+      {glassIntro && (
+          <div id="home-content" class="content-anchor" aria-hidden="true" />
+        )}
       <div class:list={["page", { centered }]}>
         <Header asHeading={headerAsHeading} />
         <main id="main-content" tabindex="-1">
