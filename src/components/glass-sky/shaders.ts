@@ -1,5 +1,3 @@
-// Adapted from ~/Projects/glass-sky: the same cast-glass optics and volumetric sky,
-// rendered with WebGL 2 so the artwork doesn't require WebGPU.
 export const skyAspect = 11 / 7.5;
 
 export const vertexSource = `#version 300 es
