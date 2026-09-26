@@ -1,0 +1,77 @@
+<figure class="pool-caustics" aria-label="Animated pool caustics">
+  <canvas aria-hidden="true"></canvas>
+  <a
+    class="shader-credit"
+    href="https://www.shadertoy.com/user/mionrin"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Pool caustics shader by mionrin"
+  >
+    Shader by mionrin
+  </a>
+</figure>
+
+<script>
+  import { initPoolCaustics } from "./pool-caustics";
+
+  document.addEventListener("astro:page-load", initPoolCaustics);
+
+  if (import.meta.hot) {
+    import.meta.hot.dispose(() => {
+      document.removeEventListener("astro:page-load", initPoolCaustics);
+    });
+  }
+</script>
+
+<style>
+  .pool-caustics {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: #14757d;
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+  }
+
+  .pool-caustics[data-rendered] canvas {
+    opacity: 1;
+  }
+
+  .shader-credit {
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 2;
+    padding: 0.4rem 0.625rem;
+    color: rgb(255 255 255 / 85%);
+    font-size: 0.75rem;
+    line-height: 1;
+    text-decoration: none;
+    opacity: 0.75;
+    transition: opacity 100ms ease;
+  }
+
+  .shader-credit:hover,
+  .shader-credit:focus-visible {
+    color: white;
+    opacity: 1;
+  }
+
+  .shader-credit:focus-visible {
+    outline: 2px solid white;
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .shader-credit {
+      transition: none;
+    }
+  }
+</style>

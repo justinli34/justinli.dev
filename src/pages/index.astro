@@ -1,7 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 
-import GlassSky from "@/components/GlassSky.astro";
+import PoolCaustics from "@/components/PoolCaustics.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 
 const posts = (await getCollection("blog")).sort((first, second) =>
@@ -9,43 +9,48 @@ const posts = (await getCollection("blog")).sort((first, second) =>
 );
 ---
 
-<BaseLayout headerAsHeading glassIntro>
-  <GlassSky />
+<BaseLayout headerAsHeading split>
+  <PoolCaustics slot="visual" />
 
   <section aria-label="About">
     <p class="about">
       Hi, I'm Justin, a fourth-year CS student at UBC. I've previously interned
       at Amazon and Ciena where I worked on an error classification engine for
       accounting systems and AI agents for telecom and data center networks. I'm
-      interested in AI, distributed systems, and developer tools. You can find
-      my projects on{" "}
-      <a
-        href="https://github.com/justinli34"
-        target="_blank"
-        rel="noopener noreferrer"
-        >GitHub</a
-      >. Outside of coding, I like to make{" "}
-      <a
-        href="https://www.youtube.com/@justinli34"
-        target="_blank"
-        rel="noopener noreferrer"
-        >music</a
-      >, play tennis, and travel. Feel free to message me on{" "}
-      <a
-        href="https://www.linkedin.com/in/justinlibc"
-        target="_blank"
-        rel="noopener noreferrer"
-        >LinkedIn</a
-      >
-      {" "}or{" "}
-      <a
-        href="https://x.com/justinlidev"
-        target="_blank"
-        rel="noopener noreferrer"
-        >X</a
-      >.
+      interested in AI, distributed systems, and developer tools. Outside of
+      coding, I like to make music, play tennis, and travel.
     </p>
   </section>
+
+  <nav class="links" aria-label="Social links">
+    <a
+      href="https://github.com/justinli34"
+      target="_blank"
+      rel="noopener noreferrer"
+      >GitHub</a
+    >
+    {" "}
+    <a
+      href="https://www.youtube.com/@justinli34"
+      target="_blank"
+      rel="noopener noreferrer"
+      >YouTube</a
+    >
+    {" "}
+    <a
+      href="https://www.linkedin.com/in/justinlibc"
+      target="_blank"
+      rel="noopener noreferrer"
+      >LinkedIn</a
+    >
+    {" "}
+    <a
+      href="https://x.com/justinlidev"
+      target="_blank"
+      rel="noopener noreferrer"
+      >X</a
+    >
+  </nav>
 
   <section class="posts" aria-label="Posts">
     <ul>
@@ -66,6 +71,12 @@ const posts = (await getCollection("blog")).sort((first, second) =>
 <style>
   .about {
     text-wrap: pretty;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
   }
 
   ul {
@@ -95,6 +106,6 @@ const posts = (await getCollection("blog")).sort((first, second) =>
   }
 
   .posts a:hover {
-    text-decoration-color: var(--color-fg);
+    text-decoration-color: currentColor;
   }
 </style>

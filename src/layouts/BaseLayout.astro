@@ -8,14 +8,14 @@ type Props = {
   title?: string;
   centered?: boolean;
   headerAsHeading?: boolean;
-  glassIntro?: boolean;
+  split?: boolean;
 };
 
 const {
   title = "Justin Li",
   centered = true,
   headerAsHeading = false,
-  glassIntro = false,
+  split = false,
 } = Astro.props;
 ---
 
@@ -33,50 +33,24 @@ const {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
     <ClientRouter fallback="none" />
-    <script is:inline define:vars={{ glassIntro }}>
-      document.documentElement.toggleAttribute(
-        "data-glass-intro",
-        glassIntro &&
-          !window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-      );
-    </script>
   </head>
 
   <body>
-    <div class:list={["page-shell", { "glass-intro": glassIntro }]}>
-      {glassIntro && (
-          <div id="home-content" class="content-anchor" aria-hidden="true" />
-        )}
-      <div class:list={["page", { centered }]}>
+    <div class:list={["page", { centered, split }]}>
+      <div class="page-content">
         <Header asHeading={headerAsHeading} />
         <main id="main-content" tabindex="-1">
           <slot />
         </main>
       </div>
+      {split && (
+          <div class="visual">
+            <slot name="visual" />
+          </div>
+        )}
     </div>
   </body>
 </html>
-
-<script>
-  import type { TransitionBeforeSwapEvent } from "astro:transitions/client";
-
-  function prepareIntro(event: TransitionBeforeSwapEvent) {
-    // Run on every route, including a first visit to a blog post. The destination
-    // anchor and scroll runway must exist before Astro restores scroll position.
-    event.newDocument.documentElement.toggleAttribute(
-      "data-glass-intro",
-      !!event.newDocument.querySelector(".glass-intro") &&
-        !matchMedia("(prefers-reduced-motion: reduce)").matches,
-    );
-  }
-
-  document.addEventListener("astro:before-swap", prepareIntro);
-  if (import.meta.hot) {
-    import.meta.hot.dispose(() => {
-      document.removeEventListener("astro:before-swap", prepareIntro);
-    });
-  }
-</script>
 
 <style>
   :global(:root) {
@@ -98,48 +72,53 @@ const {
     max-width: 700px;
     /* Keep layout stable while mobile browser bars expand/collapse. */
     min-height: 100svh;
-    gap: 1rem;
     margin: 0 auto;
     padding: 4rem 2rem 2rem;
   }
 
-  .glass-intro {
+  .page-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 0;
+  }
+
+  .page.split {
+    gap: 0;
+    max-width: none;
+    min-height: 100dvh;
+    padding: 0;
+  }
+
+  .page.split .page-content {
+    padding: 4rem 2rem 3rem;
+  }
+
+  .visual {
     position: relative;
+    flex-grow: 1;
+    min-width: 0;
+    height: clamp(18rem, 72vw, 30rem);
   }
 
-  .content-anchor {
+  .visual::before {
+    --fade-direction: to bottom;
     position: absolute;
+    z-index: 1;
     top: 0;
+    right: 0;
     left: 0;
-    width: 1px;
-    height: 1px;
+    height: clamp(5rem, 20vw, 9rem);
     pointer-events: none;
-  }
-
-  :global(html[data-glass-intro]) .content-anchor {
-    top: var(--intro-distance, 100svh);
-  }
-
-  :global(html[data-glass-intro]) .glass-intro::after {
     content: "";
-    display: block;
-    height: var(--intro-distance, 100svh);
-  }
-
-  :global(html[data-glass-intro]) .glass-intro .page {
-    position: sticky;
-    top: 0;
-  }
-
-  :global(html[data-glass-intro]) .glass-intro :global(header),
-  :global(html[data-glass-intro]) .glass-intro :global(main > section) {
-    opacity: var(--content-reveal, 0);
-    visibility: var(--content-visibility, hidden);
-    transform: translateY(var(--content-offset, 18px));
-  }
-
-  :global(html[data-glass-intro]) .glass-intro :global(header) {
-    transform: translateY(var(--header-offset, -8px));
+    background: linear-gradient(
+      var(--fade-direction),
+      var(--color-bg),
+      color-mix(in srgb, var(--color-bg) 88%, transparent) 20%,
+      color-mix(in srgb, var(--color-bg) 55%, transparent) 46%,
+      color-mix(in srgb, var(--color-bg) 22%, transparent) 72%,
+      transparent
+    );
   }
 
   main {
@@ -150,9 +129,36 @@ const {
   }
 
   @media (min-width: 768px) {
-    .page.centered {
+    .page.centered:not(.split) {
       justify-content: center;
       padding: 2rem 2rem 8rem;
+    }
+  }
+
+  @media (min-width: 900px) {
+    .page.split {
+      display: grid;
+      grid-template-columns: minmax(0, 5fr) minmax(0, 4fr);
+      align-items: stretch;
+    }
+
+    .page.split .page-content {
+      justify-content: center;
+      justify-self: end;
+      width: min(100%, 650px);
+      padding: 4rem clamp(2rem, 4vw, 6rem);
+    }
+
+    .page.split .visual {
+      height: 100dvh;
+    }
+
+    .visual::before {
+      --fade-direction: to right;
+      right: auto;
+      bottom: 0;
+      width: clamp(7rem, 14vw, 14rem);
+      height: auto;
     }
   }
 </style>
