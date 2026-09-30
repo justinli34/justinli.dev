@@ -1,0 +1,97 @@
+---
+import { getCollection } from "astro:content";
+
+import Disc from "@/components/Disc.astro";
+import IdentityWindow from "@/components/windows/IdentityWindow.astro";
+import IncubatorWindow from "@/components/windows/IncubatorWindow.astro";
+import LogWindow from "@/components/windows/LogWindow.astro";
+import SignalsWindow from "@/components/windows/SignalsWindow.astro";
+import WorkWindow from "@/components/windows/WorkWindow.astro";
+import WritingWindow from "@/components/windows/WritingWindow.astro";
+import { identity, log, sections, signals, work } from "@/data/culture";
+import "@/styles/global.css";
+
+type Props = {
+  title?: string;
+  description?: string;
+};
+
+const {
+  title = identity.name,
+  description = "Justin Li, a computer science student at UBC. A living plate: pick a disc to open a window.",
+} = Astro.props;
+
+const posts = (await getCollection("blog")).sort((first, second) =>
+  second.data.date.localeCompare(first.data.date),
+);
+
+const doses: Record<string, string> = {
+  identity: "01",
+  writing: String(posts.length).padStart(2, "0"),
+  work: String(work.length).padStart(2, "0"),
+  signals: String(signals.length).padStart(2, "0"),
+  log: String(log.length).padStart(2, "0"),
+  incubator: "37°",
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" type="image/png" href="/favicon.png" sizes="64x64" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,100..900,0..100,0..1;1,9..144,100..900,0..100,0..1&family=Martian+Mono:wdth,wght@75..112.5,100..800&display=swap"
+    />
+    <title>{title}</title>
+    <script is:inline>
+      document.documentElement.classList.add("js");
+      try {
+        const illumination = localStorage.getItem("culture:illumination");
+        if (illumination === "bright" || illumination === "dark") {
+          document.documentElement.dataset.illumination = illumination;
+        }
+      } catch {}
+    </script>
+  </head>
+
+  <body>
+    <div class="plate" data-plate>
+      <canvas class="plate-culture" data-culture aria-hidden="true"></canvas>
+
+      <h1 class="visually-hidden">{identity.name}</h1>
+      <div class="plate-name" aria-hidden="true">
+        <span data-name-line>Justin</span>
+        <span data-name-line>Li</span>
+      </div>
+
+      <nav class="discs" aria-label="Sections">
+        {sections.map((section) => (
+            <Disc section={section} dose={doses[section.id] ?? ""} />
+          ))}
+      </nav>
+
+      <main class="windows" data-windows>
+        <IdentityWindow />
+        <WritingWindow posts={posts} />
+        <WorkWindow />
+        <SignalsWindow />
+        <LogWindow />
+        <IncubatorWindow />
+        <slot />
+      </main>
+    </div>
+
+    <script>
+      import { boot } from "@/culture";
+
+      boot();
+    </script>
+  </body>
+</html>

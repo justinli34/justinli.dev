@@ -1,0 +1,71 @@
+---
+import Window from "@/components/Window.astro";
+
+const readings = [
+  ["Plate", "plate"],
+  ["Incubating", "elapsed"],
+  ["Coverage", "coverage"],
+  ["State", "growth"],
+  ["Seed", "seed"],
+  ["Generation", "generation"],
+  ["Grid", "grid"],
+  ["Precision", "precision"],
+  ["Steps / frame", "steps"],
+  ["Medium", null],
+] as const;
+---
+
+<Window id="incubator" code="IN" label="System" title="Incubator" size="narrow">
+  <fieldset class="control">
+    <legend>Illumination</legend>
+    <div class="segmented">
+      <label>
+        <input type="radio" name="illumination" value="auto" checked />
+        <span>Auto</span>
+      </label>
+      <label>
+        <input type="radio" name="illumination" value="bright" />
+        <span>Bright-field</span>
+      </label>
+      <label>
+        <input type="radio" name="illumination" value="dark" />
+        <span>Dark-field</span>
+      </label>
+    </div>
+  </fieldset>
+  <div class="control">
+    <span class="control-label">Plate</span>
+    <div class="buttons">
+      <button type="button" data-growth-toggle aria-pressed="false">
+        Pause growth
+      </button>
+      <button type="button" data-reinoculate>Re-inoculate</button>
+      <button type="button" data-restore>Today’s plate</button>
+    </div>
+  </div>
+  <dl class="readings">
+    {readings.map(([term, readout]) => (
+        <div>
+          <dt>{term}</dt>
+          {readout ? <dd data-readout={readout}>—</dd> : <dd>Gray–Scott</dd>}
+        </div>
+      ))}
+  </dl>
+  <dl class="spec">
+    <div>
+      <dt>Drag the medium</dt>
+      <dd>Inoculate your strain</dd>
+    </div>
+    <div>
+      <dt>Hover</dt>
+      <dd>Feed the culture</dd>
+    </div>
+    <div>
+      <dt>Esc</dt>
+      <dd>Close the top window</dd>
+    </div>
+  </dl>
+  <p class="window-note">
+    Inoculated from the date: each day grows a different plate.
+  </p>
+</Window>

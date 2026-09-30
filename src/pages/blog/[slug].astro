@@ -1,7 +1,9 @@
 ---
 import { type CollectionEntry, getCollection, render } from "astro:content";
 
-import BaseLayout from "@/layouts/BaseLayout.astro";
+import Window from "@/components/Window.astro";
+import { stamp } from "@/data/format";
+import PlateLayout from "@/layouts/PlateLayout.astro";
 
 export async function getStaticPaths() {
   return (await getCollection("blog")).map((post) => ({
@@ -18,23 +20,17 @@ const { post } = Astro.props as Props;
 const { Content } = await render(post);
 ---
 
-<BaseLayout title={`${post.data.title} | Justin Li`} centered={false}>
-  <article>
-    <header>
-      <h1>{post.data.title}</h1>
-      {post.data.date && (
-          <time datetime={post.data.date}>{post.data.date}</time>
-        )}
-    </header>
-    <div>
+<PlateLayout title={`${post.data.title} — Justin Li`}>
+  <Window
+    id={`post:${post.id}`}
+    code="WR"
+    label={stamp(post.data.date)}
+    title={post.data.title}
+    size="wide"
+    open
+  >
+    <article class="prose">
       <Content />
-    </div>
-  </article>
-</BaseLayout>
-
-<style>
-  article {
-    display: grid;
-    gap: 1rem;
-  }
-</style>
+    </article>
+  </Window>
+</PlateLayout>

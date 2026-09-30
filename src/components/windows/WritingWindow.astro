@@ -1,0 +1,32 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+import Window from "@/components/Window.astro";
+import { stamp } from "@/data/format";
+
+type Props = {
+  posts: CollectionEntry<"blog">[];
+};
+
+const { posts } = Astro.props;
+---
+
+<Window id="writing" code="WR" label="Writing" title="Writing">
+  <p class="window-note">
+    {posts.length} {posts.length === 1 ? "entry" : "entries"}, newest first.
+  </p>
+  <ol class="entries">
+    {posts.map((post) => (
+        <li>
+          <a
+            href={`/blog/${encodeURIComponent(post.id)}`}
+            data-open={`post:${post.id}`}
+          >
+            <time datetime={post.data.date}>{stamp(post.data.date)}</time>
+            <span class="entry-title">{post.data.title}</span>
+            <span class="entry-mark" aria-hidden="true">→</span>
+          </a>
+        </li>
+      ))}
+  </ol>
+</Window>

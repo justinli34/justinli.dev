@@ -1,68 +1,964 @@
+/* ==========================================================================
+   Culture — a grown interface.
+   Two illuminations share one set of tokens. The shader palette in
+   src/culture/index.ts mirrors these colours.
+   ========================================================================== */
+
 :root {
   color-scheme: light;
-  --color-bg: oklch(0.98 0 0);
-  --color-fg: oklch(0.35 0 0);
-  --color-underline: oklch(0.8 0 0);
-  --color-muted: oklch(0.5 0 0);
-  --color-border: oklch(0.9 0 0);
-  --color-accent: #14757d;
+  --medium: #efeadf;
+  --paper: #fbf8f2;
+  --ink: #261d4d;
+  --pigment: #35296a;
+  --strain: #d8432a;
+  --ink-2: color-mix(in oklab, var(--ink) 70%, transparent);
+  --ink-3: color-mix(in oklab, var(--ink) 46%, transparent);
+  --ink-4: color-mix(in oklab, var(--ink) 16%, transparent);
+  --shadow: color-mix(in oklab, var(--pigment) 22%, transparent);
 
-  font-family: Geist, system-ui;
-  line-height: 1.5;
-
-  color: var(--color-fg);
-  background-color: var(--color-bg);
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --serif: "Fraunces", ui-serif, Georgia, serif;
+  --mono: "Martian Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --edge: 22px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
-* {
+:root[data-illumination="dark"] {
+  color-scheme: dark;
+  --medium: #0d0c13;
+  --paper: #1b1928;
+  --ink: #ebe6f6;
+  --pigment: #8fa8ff;
+  --strain: #ff6a48;
+  --shadow: rgb(0 0 0 / 50%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-illumination="bright"]) {
+    color-scheme: dark;
+    --medium: #0d0c13;
+    --paper: #1b1928;
+    --ink: #ebe6f6;
+    --pigment: #8fa8ff;
+    --strain: #ff6a48;
+    --shadow: rgb(0 0 0 / 50%);
+  }
+}
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
-}
-
-::selection {
-  background: rgb(20 117 125 / 22%);
 }
 
 html,
 body {
+  height: 100%;
   margin: 0;
-  padding: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  color: var(--ink);
+  background: var(--medium);
+  font-family: var(--serif);
+  font-size: 16px;
+  font-optical-sizing: auto;
+  font-variation-settings: "SOFT" 50;
+  line-height: 1.5;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition:
+    background-color 400ms ease,
+    color 400ms ease;
 }
 
 h1,
 h2,
-p {
+h3,
+p,
+ol,
+ul,
+dl,
+dd,
+figure,
+fieldset {
   margin: 0;
 }
 
 a {
   color: inherit;
-  text-decoration-color: var(--color-underline);
-  text-underline-offset: 0.1em;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+::selection {
+  color: var(--paper);
+  background: var(--strain);
+}
+
+:focus-visible {
+  outline: 1px solid var(--strain);
+  outline-offset: 3px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Instrument type: every label, readout and code on the plate. */
+.disc,
+.window-bar,
+.window-note,
+.traits dt,
+.spec,
+.readings,
+.entries time,
+.entry-code,
+.entry-index,
+.entry-kind,
+.entry-handle,
+.log time,
+.control-label,
+.control legend,
+.segmented,
+.buttons {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-variation-settings: normal;
+  font-stretch: 87.5%;
+  letter-spacing: 0.08em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+/* The plate --------------------------------------------------------------- */
+
+.plate {
+  --name-size: clamp(112px, min(15.5vw, 29vh), 300px);
+  --ring-x: 71vw;
+  --ring-y: 50vh;
+  --ring-r: min(13vw, 22vh);
+  --lens: clamp(92px, 8vw, 128px);
+
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+.plate-culture {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+  opacity: 0;
+  touch-action: none;
+  transition: opacity 500ms ease;
+}
+
+.plate[data-culture="live"] .plate-culture {
+  opacity: 1;
+}
+
+.plate-name {
+  position: absolute;
+  bottom: calc(var(--edge) + 64px);
+  left: calc(var(--edge) + 1vw);
+  color: var(--pigment);
+  font-family: var(--serif);
+  font-size: var(--name-size);
+  font-variation-settings:
+    "SOFT" 100,
+    "WONK" 0;
+  font-weight: 800;
+  letter-spacing: 0.015em;
+  line-height: 0.84;
+  pointer-events: none;
+  user-select: none;
+}
+
+.plate-name span {
+  display: block;
+  width: max-content;
+}
+
+/* The culture grows the name; the text only lays it out. */
+.js .plate-name {
+  visibility: hidden;
+}
+
+.js .plate[data-culture="unavailable"] .plate-name {
+  visibility: visible;
+}
+
+/* Discs: glass lenses on the plate --------------------------------------- */
+/* The shader draws the glass (refraction, rim, highlight) at each disc's
+   position; the element supplies the position and carries the label. */
+
+.discs {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.disc {
+  position: absolute;
+  top: calc(var(--ring-y) + var(--ring-r) * sin(var(--angle)));
+  left: calc(var(--ring-x) + var(--ring-r) * cos(var(--angle)));
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  width: var(--lens);
+  height: var(--lens);
+  color: var(--ink);
+  text-decoration: none;
+  border-radius: 50%;
+  translate: -50% -50%;
+  pointer-events: auto;
   transition:
-    color 100ms ease,
-    text-decoration-color 100ms ease;
+    scale 320ms var(--ease),
+    color 300ms ease,
+    opacity 600ms ease 250ms;
 }
 
-a:hover {
-  color: var(--color-accent);
-  text-decoration-color: currentColor;
+.disc-centre {
+  top: var(--ring-y);
+  left: var(--ring-x);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  a {
-    transition: none;
+.js .disc {
+  opacity: 0;
+}
+
+.js .plate[data-culture] .disc {
+  opacity: 1;
+}
+
+.disc:hover,
+.disc:focus-visible {
+  scale: 1.04;
+}
+
+.disc:focus-visible {
+  outline: 1px solid var(--strain);
+  outline-offset: 5px;
+}
+
+/* An engraved reticle, like the graticule of an eyepiece. */
+.disc-reticle {
+  position: absolute;
+  inset: 14%;
+  border: 1px solid var(--ink-4);
+  border-radius: 50%;
+  transition:
+    inset 320ms var(--ease),
+    border-color 300ms ease;
+}
+
+.disc-reticle::before,
+.disc-reticle::after {
+  position: absolute;
+  content: "";
+  background: linear-gradient(
+    var(--tick-direction),
+    var(--ink-3) 0 5px,
+    transparent 5px calc(100% - 5px),
+    var(--ink-3) calc(100% - 5px)
+  );
+}
+
+.disc-reticle::before {
+  --tick-direction: to bottom;
+  top: -3px;
+  bottom: -3px;
+  left: calc(50% - 0.5px);
+  width: 1px;
+}
+
+.disc-reticle::after {
+  --tick-direction: to right;
+  top: calc(50% - 0.5px);
+  right: -3px;
+  left: -3px;
+  height: 1px;
+}
+
+.disc:hover .disc-reticle,
+.disc:focus-visible .disc-reticle {
+  inset: 9%;
+}
+
+.disc-code {
+  font-size: 15px;
+  font-stretch: 100%;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.disc-label {
+  margin-top: 6px;
+  font-size: 8.5px;
+  font-stretch: 75%;
+  letter-spacing: 0.14em;
+  line-height: 1;
+}
+
+.disc-dose {
+  margin-top: 3px;
+  color: var(--ink-3);
+  font-size: 7.5px;
+  line-height: 1;
+}
+
+.disc[data-active] {
+  color: var(--paper);
+}
+
+.disc[data-active] .disc-dose {
+  color: color-mix(in oklab, var(--paper) 60%, transparent);
+}
+
+.disc[data-active] .disc-reticle {
+  border-color: color-mix(in oklab, var(--paper) 30%, transparent);
+}
+
+/* Without the culture there is no glass to draw: a flat stand-in. */
+.plate:not([data-culture="live"]) .disc {
+  background: var(--paper);
+  box-shadow:
+    inset 0 0 0 1px var(--ink-4),
+    0 10px 24px -12px var(--shadow);
+}
+
+.plate:not([data-culture="live"]) .disc[data-active] {
+  background: var(--ink);
+}
+
+/* Windows ------------------------------------------------------------------- */
+
+.windows {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+}
+
+.window {
+  --window-width: 440px;
+
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: none;
+  flex-direction: column;
+  width: min(var(--window-width), calc(100vw - 2 * var(--edge)));
+  max-height: calc(100svh - 40px);
+  color: var(--ink);
+  background: var(--medium);
+  outline: none;
+  box-shadow:
+    0 0 0 1px var(--ink-4),
+    0 30px 60px -30px var(--shadow);
+  pointer-events: auto;
+}
+
+.window-narrow {
+  --window-width: 380px;
+}
+
+.window-wide {
+  --window-width: 660px;
+}
+
+.window[data-open] {
+  display: flex;
+}
+
+html:not(.js) .window {
+  top: 88px;
+  left: 50%;
+  translate: -50% 0;
+}
+
+html:not(.js) .window:target {
+  display: flex;
+}
+
+.window[data-state="entering"],
+.window[data-state="closing"] {
+  opacity: 0;
+  filter: blur(6px);
+}
+
+.window[data-state="open"] {
+  opacity: 1;
+  filter: blur(0);
+  transition:
+    opacity 480ms ease 260ms,
+    filter 620ms var(--ease) 260ms;
+}
+
+.window[data-state="closing"] {
+  transition:
+    opacity 200ms ease,
+    filter 200ms ease;
+}
+
+.window-corner {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border: 0 solid var(--ink-2);
+  pointer-events: none;
+}
+
+.window-corner[data-corner="tl"] {
+  top: -5px;
+  left: -5px;
+  border-top-width: 1px;
+  border-left-width: 1px;
+}
+
+.window-corner[data-corner="tr"] {
+  top: -5px;
+  right: -5px;
+  border-top-width: 1px;
+  border-right-width: 1px;
+}
+
+.window-corner[data-corner="bl"] {
+  bottom: -5px;
+  left: -5px;
+  border-bottom-width: 1px;
+  border-left-width: 1px;
+}
+
+.window-corner[data-corner="br"] {
+  right: -5px;
+  bottom: -5px;
+  border-right-width: 1px;
+  border-bottom-width: 1px;
+}
+
+.window[data-top] .window-corner {
+  border-color: var(--ink);
+}
+
+.window-bar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px 11px;
+  color: var(--ink-2);
+  border-bottom: 1px solid var(--ink-4);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.window[data-dragging] .window-bar {
+  cursor: grabbing;
+}
+
+.window-code {
+  color: var(--ink);
+  font-weight: 650;
+}
+
+.window-coords {
+  margin-left: auto;
+  color: var(--ink-3);
+}
+
+.window-close {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  margin: -8px -9px -8px -4px;
+  color: var(--ink-2);
+  border-radius: 50%;
+  transition: color 150ms ease;
+}
+
+.window-close svg {
+  width: 9px;
+  height: 9px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.3;
+}
+
+.window-close:hover {
+  color: var(--strain);
+}
+
+.window-body {
+  padding: 22px 16px 24px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: var(--ink-4) transparent;
+  scrollbar-width: thin;
+}
+
+.window-title {
+  margin-bottom: 18px;
+  font-size: 46px;
+  font-variation-settings:
+    "SOFT" 100,
+    "WONK" 1;
+  font-weight: 300;
+  letter-spacing: -0.025em;
+  line-height: 0.95;
+  text-wrap: balance;
+}
+
+.window-note {
+  margin-bottom: 18px;
+  color: var(--ink-2);
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.placeholder {
+  color: var(--ink-3);
+  font-style: italic;
+}
+
+/* Section content ----------------------------------------------------------- */
+
+.lede {
+  font-size: 17px;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+.lede a {
+  color: var(--strain);
+  text-underline-offset: 0.15em;
+}
+
+.traits,
+.spec {
+  display: grid;
+  margin-top: 22px;
+  border-top: 1px solid var(--ink-4);
+}
+
+.traits div,
+.spec div {
+  display: grid;
+  grid-template-columns: 112px 1fr;
+  gap: 14px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--ink-4);
+}
+
+.traits dt {
+  padding-top: 4px;
+  color: var(--ink-3);
+}
+
+.traits dd {
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.spec dt {
+  color: var(--ink-3);
+}
+
+.spec dd {
+  color: var(--ink);
+}
+
+.entries {
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--ink-4);
+}
+
+.entries li {
+  border-bottom: 1px solid var(--ink-4);
+}
+
+.entries a {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: baseline;
+  gap: 16px;
+  padding: 13px 0 12px;
+  text-decoration: none;
+}
+
+.entries time,
+.entry-code,
+.entry-index,
+.entry-kind,
+.entry-handle {
+  color: var(--ink-3);
+}
+
+.entry-title {
+  font-size: 21px;
+  font-variation-settings:
+    "SOFT" 100,
+    "WONK" 0;
+  font-weight: 380;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+
+.entry-mark {
+  color: var(--ink-3);
+  font-family: var(--mono);
+  transition:
+    translate 250ms var(--ease),
+    color 150ms ease;
+}
+
+.entries a:hover .entry-title,
+.entries a:hover .entry-mark {
+  color: var(--strain);
+}
+
+.entries a:hover .entry-mark {
+  translate: 3px 0;
+}
+
+.entries a[target="_blank"] {
+  grid-template-columns: 26px 1fr auto auto;
+}
+
+.entries-rich li {
+  display: grid;
+  gap: 6px;
+  padding: 14px 0 15px;
+}
+
+.entry-head {
+  display: grid;
+  grid-template-columns: 26px 1fr auto;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.entry-text {
+  padding-left: 38px;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.log {
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--ink-4);
+}
+
+.log li {
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--ink-4);
+}
+
+.log time {
+  padding-top: 4px;
+  color: var(--ink-3);
+}
+
+.log p {
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+/* Incubator controls */
+
+.control {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding: 0;
+  border: 0;
+}
+
+.control legend,
+.control-label {
+  padding: 0;
+  margin-bottom: 10px;
+  color: var(--ink-3);
+}
+
+.segmented {
+  display: flex;
+  width: max-content;
+  max-width: 100%;
+  padding: 3px;
+  border: 1px solid var(--ink-4);
+  border-radius: 999px;
+}
+
+.segmented label {
+  position: relative;
+  cursor: pointer;
+}
+
+.segmented input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.segmented span {
+  display: block;
+  padding: 6px 11px;
+  color: var(--ink-2);
+  border-radius: 999px;
+  transition:
+    color 150ms ease,
+    background-color 150ms ease;
+}
+
+.segmented input:checked + span {
+  color: var(--paper);
+  background: var(--ink);
+}
+
+.segmented input:focus-visible + span {
+  outline: 1px solid var(--strain);
+  outline-offset: 2px;
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.buttons button {
+  padding: 7px 12px;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid var(--ink-4);
+  border-radius: 999px;
+  transition:
+    border-color 150ms ease,
+    color 150ms ease;
+}
+
+.buttons button:hover {
+  color: var(--strain);
+  border-color: currentColor;
+}
+
+.buttons button[aria-pressed="true"] {
+  color: var(--paper);
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.spec {
+  margin-bottom: 18px;
+}
+
+/* Live instrument readings, two to a row. */
+.readings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-top: 4px;
+  border-top: 1px solid var(--ink-4);
+}
+
+.readings div {
+  display: grid;
+  gap: 3px;
+  padding: 8px 0 9px;
+  border-bottom: 1px solid var(--ink-4);
+}
+
+.readings div:nth-child(odd) {
+  padding-right: 12px;
+  border-right: 1px solid var(--ink-4);
+}
+
+.readings div:nth-child(even) {
+  padding-left: 12px;
+}
+
+.readings dt {
+  color: var(--ink-3);
+}
+
+.readings dd {
+  color: var(--ink);
+}
+
+.spec div {
+  grid-template-columns: 1fr auto;
+  padding: 7px 0;
+}
+
+/* Writing */
+
+.prose {
+  max-width: 62ch;
+  font-size: 18px;
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+
+.prose > * + * {
+  margin-top: 1em;
+}
+
+.prose h2,
+.prose h3 {
+  margin-top: 1.6em;
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.prose a {
+  color: var(--strain);
+  text-underline-offset: 0.15em;
+}
+
+.prose code {
+  font-family: var(--mono);
+  font-size: 0.78em;
+}
+
+.prose pre {
+  padding: 14px 16px;
+  overflow: auto;
+  font-size: 14px;
+  border: 1px solid var(--ink-4);
+}
+
+.prose img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Portrait screens: the name sits above the ring ------------------------ */
+
+@media (max-aspect-ratio: 5 / 6), (max-width: 719px) {
+  .plate {
+    --name-size: min(29vw, 19svh);
+    --ring-x: 50vw;
+    --ring-y: 61svh;
+    --ring-r: min(30vw, 18svh);
+    --lens: clamp(74px, 18vw, 104px);
+  }
+
+  .plate-name {
+    top: calc(var(--edge) + 12px);
+    bottom: auto;
+    left: var(--edge);
   }
 }
 
-time {
-  color: var(--color-muted);
+/* Small screens: windows become sheets over the plate --------------------- */
+
+@media (max-width: 719px) {
+  .plate {
+    --edge: 16px;
+  }
+
+  .window-coords {
+    display: none;
+  }
+
+  .window,
+  .window-narrow,
+  .window-wide {
+    top: auto;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    max-height: 82svh;
+    background: var(--medium);
+    box-shadow: 0 -24px 48px -24px var(--shadow);
+    translate: none;
+  }
+
+  html:not(.js) .window {
+    top: auto;
+    left: 0;
+    translate: none;
+  }
+
+  .window-corner {
+    display: none;
+  }
+
+  .window-bar {
+    padding: 14px var(--edge) 12px;
+    cursor: default;
+  }
+
+  .window-close {
+    margin-left: auto;
+  }
+
+  .window-body {
+    padding: 20px var(--edge) calc(28px + env(safe-area-inset-bottom));
+  }
+
+  .window-title {
+    font-size: 38px;
+  }
+
+  .window[data-state="entering"],
+  .window[data-state="closing"] {
+    filter: none;
+    translate: 0 24px;
+  }
+
+  .window[data-state="open"] {
+    translate: 0 0;
+    transition:
+      opacity 300ms ease 120ms,
+      translate 420ms var(--ease) 120ms;
+  }
 }
 
-article p + p {
-  margin-top: 1rem;
+@media (prefers-reduced-motion: reduce) {
+  body,
+  .plate-culture,
+  .disc,
+  .disc-reticle,
+  .window-close,
+  .entry-mark,
+  .segmented span,
+  .buttons button,
+  .window[data-state],
+  .window[data-state="open"],
+  .window[data-state="closing"] {
+    transition: none;
+  }
+
+  .window[data-state="entering"],
+  .window[data-state="closing"] {
+    filter: none;
+    translate: none;
+  }
 }

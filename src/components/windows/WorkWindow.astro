@@ -1,0 +1,23 @@
+---
+import Window from "@/components/Window.astro";
+import { work } from "@/data/culture";
+---
+
+<Window id="work" code="WK" label="Work" title="Work">
+  <ol class="entries entries-rich">
+    {work.map((item, index) => (
+        <li>
+          <div class="entry-head">
+            <span class="entry-index">{String(index + 1).padStart(2, "0")}</span>
+            <span class="entry-title">{item.title}</span>
+            <span class="entry-kind">
+              {item.kind} · {item.year}
+            </span>
+          </div>
+          <p class:list={["entry-text", { placeholder: item.placeholder }]}>
+            {item.description}
+          </p>
+        </li>
+      ))}
+  </ol>
+</Window>

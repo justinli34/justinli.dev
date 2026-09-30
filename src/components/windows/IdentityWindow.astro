@@ -1,0 +1,20 @@
+---
+import Window from "@/components/Window.astro";
+import { identity } from "@/data/culture";
+---
+
+<Window id="identity" code="ID" label="Specimen" title="Identity">
+  <p class="lede">{identity.summary}</p>
+  <dl class="traits">
+    {identity.traits.map(([term, value]) => (
+        <div>
+          <dt>{term}</dt>
+          <dd>{value}</dd>
+        </div>
+      ))}
+    <div>
+      <dt>Local time</dt>
+      <dd><span data-readout="clock">—</span> Pacific</dd>
+    </div>
+  </dl>
+</Window>

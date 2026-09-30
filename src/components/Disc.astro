@@ -1,0 +1,24 @@
+---
+import type { Section } from "@/data/culture";
+
+type Props = {
+  section: Section;
+  dose: string;
+};
+
+const { section, dose } = Astro.props;
+const centred = section.angle === undefined;
+---
+
+<a
+  class:list={["disc", { "disc-centre": centred }]}
+  href={`/#${section.id}`}
+  data-open={section.id}
+  data-zone-shape="circle"
+  style={centred ? undefined : `--angle: ${section.angle}deg`}
+>
+  <span class="disc-reticle" aria-hidden="true"></span>
+  <span class="disc-code" aria-hidden="true">{section.code}</span>
+  <span class="disc-label">{section.label}</span>
+  <span class="disc-dose" aria-hidden="true">{dose}</span>
+</a>

@@ -1,7 +1,20 @@
 ---
-import BaseLayout from "@/layouts/BaseLayout.astro";
+import Window from "@/components/Window.astro";
+import PlateLayout from "@/layouts/PlateLayout.astro";
 ---
 
-<BaseLayout title="Page not found | Justin Li">
-  <h1>Page not found.</h1>
-</BaseLayout>
+<PlateLayout title="Nothing grew here — Justin Li">
+  <Window
+    id="missing"
+    code="404"
+    label="No growth"
+    title="Nothing grew here"
+    size="narrow"
+    open
+  >
+    <p class="lede">
+      There is no specimen at this address. The plate is still alive around it.
+      Pick a disc, or <a href="/" data-close>return to the plate</a>.
+    </p>
+  </Window>
+</PlateLayout>

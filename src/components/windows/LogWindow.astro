@@ -1,0 +1,16 @@
+---
+import Window from "@/components/Window.astro";
+import { log } from "@/data/culture";
+import { stamp } from "@/data/format";
+---
+
+<Window id="log" code="LG" label="Growth log" title="Log" size="narrow">
+  <ol class="log">
+    {log.map((item) => (
+        <li>
+          <time datetime={item.date}>{stamp(item.date)}</time>
+          <p class:list={{ placeholder: item.placeholder }}>{item.entry}</p>
+        </li>
+      ))}
+  </ol>
+</Window>

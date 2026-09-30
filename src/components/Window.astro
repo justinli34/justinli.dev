@@ -1,0 +1,43 @@
+---
+type Props = {
+  /** Window id: a section id, or `post:<slug>` for writing. */
+  id: string;
+  code: string;
+  label: string;
+  title: string;
+  open?: boolean;
+  size?: "narrow" | "regular" | "wide";
+};
+
+const { id, code, label, title, open = false, size = "regular" } = Astro.props;
+const domId = id.replace(":", "-");
+---
+
+<section
+  class:list={["window", `window-${size}`]}
+  id={domId}
+  data-window={id}
+  data-title={title}
+  data-open={open ? "" : undefined}
+  aria-labelledby={`${domId}-title`}
+  tabindex="-1"
+>
+  <header class="window-bar" data-drag>
+    <span class="window-code">{code}</span>
+    <span class="window-label">{label}</span>
+    <span class="window-coords" data-coords aria-hidden="true">0000·0000</span>
+    <a class="window-close" href="/" data-close aria-label={`Close ${title}`}>
+      <svg viewBox="0 0 10 10" aria-hidden="true">
+        <path d="M1 1l8 8M9 1l-8 8"></path>
+      </svg>
+    </a>
+  </header>
+  <div class="window-body">
+    <h2 class="window-title" id={`${domId}-title`}>{title}</h2>
+    <slot />
+  </div>
+  <span class="window-corner" data-corner="tl" aria-hidden="true"></span>
+  <span class="window-corner" data-corner="tr" aria-hidden="true"></span>
+  <span class="window-corner" data-corner="bl" aria-hidden="true"></span>
+  <span class="window-corner" data-corner="br" aria-hidden="true"></span>
+</section>

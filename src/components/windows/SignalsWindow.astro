@@ -1,0 +1,20 @@
+---
+import Window from "@/components/Window.astro";
+import { signals } from "@/data/culture";
+---
+
+<Window id="signals" code="SG" label="Signals" title="Signals" size="narrow">
+  <p class="window-note">Where to reach this specimen.</p>
+  <ul class="entries">
+    {signals.map((signal) => (
+        <li>
+          <a href={signal.href} target="_blank" rel="noopener noreferrer">
+            <span class="entry-code">{signal.code}</span>
+            <span class="entry-title">{signal.label}</span>
+            <span class="entry-handle">{signal.handle}</span>
+            <span class="entry-mark" aria-hidden="true">↗</span>
+          </a>
+        </li>
+      ))}
+  </ul>
+</Window>
