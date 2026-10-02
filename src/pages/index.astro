@@ -29,21 +29,18 @@ const posts = (await getCollection("blog")).sort((first, second) =>
       rel="noopener noreferrer"
       >GitHub</a
     >
-    {" "}
     <a
       href="https://www.youtube.com/@justinli34"
       target="_blank"
       rel="noopener noreferrer"
       >YouTube</a
     >
-    {" "}
     <a
       href="https://www.linkedin.com/in/justinlibc"
       target="_blank"
       rel="noopener noreferrer"
       >LinkedIn</a
     >
-    {" "}
     <a
       href="https://x.com/justinlidev"
       target="_blank"
@@ -55,15 +52,13 @@ const posts = (await getCollection("blog")).sort((first, second) =>
   <section class="posts" aria-label="Posts">
     <ul>
       {posts.map((post) => (
-          <li>
-            {post.data.date && (
-              <time datetime={post.data.date}>{post.data.date}</time>
-            )}
-            <a href={`/blog/${encodeURIComponent(post.id)}`}>
-              {post.data.title}
-            </a>
-          </li>
-        ))}
+        <li>
+          {post.data.date && (
+            <time datetime={post.data.date}>{post.data.date}</time>
+          )}
+          <a href={`/blog/${encodeURIComponent(post.id)}`}>{post.data.title}</a>
+        </li>
+      ))}
     </ul>
   </section>
 </BaseLayout>

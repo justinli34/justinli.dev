@@ -23,8 +23,8 @@ const { Content } = await render(post);
     <header>
       <h1>{post.data.title}</h1>
       {post.data.date && (
-          <time datetime={post.data.date}>{post.data.date}</time>
-        )}
+        <time datetime={post.data.date}>{post.data.date}</time>
+      )}
     </header>
     <div>
       <Content />
