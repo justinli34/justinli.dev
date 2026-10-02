@@ -14,7 +14,7 @@ type Props = {
   post: CollectionEntry<"blog">;
 };
 
-const { post } = Astro.props as Props;
+const { post } = Astro.props;
 const { Content } = await render(post);
 ---
 
