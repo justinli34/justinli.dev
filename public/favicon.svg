@@ -1,0 +1,10 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 16 16"
+  shape-rendering="crispEdges"
+>
+  <title>Justin Li</title>
+  <path fill="#0f0f0f" d="M0 0h16v16H0z" />
+  <path fill="#ffe973" d="M8 1h4v4H8z" />
+  <path fill="#d7d7d7" d="M8 6h4v9H3v-3h5z" />
+</svg>
