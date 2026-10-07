@@ -1,0 +1,34 @@
+<footer class="mountains" aria-hidden="true" transition:persist="mountains">
+  <canvas></canvas>
+</footer>
+
+<script>
+  import { initMountains } from "./mountains/mountains";
+
+  document.addEventListener("astro:page-load", initMountains);
+</script>
+
+<style>
+  .mountains {
+    /* Fixed height: narrower screens crop the scene instead of shrinking it. */
+    height: 16rem;
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1.5s ease;
+  }
+
+  .mountains[data-ready] canvas {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    canvas {
+      transition: none;
+    }
+  }
+</style>

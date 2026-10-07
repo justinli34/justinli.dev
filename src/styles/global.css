@@ -4,7 +4,7 @@
   --color-fg: oklch(0.88 0 0);
   --color-underline: oklch(0.4 0 0);
   --color-muted: oklch(0.62 0 0);
-  --color-accent: oklch(0.76 0.1 200);
+  --color-accent: oklch(0.93 0.14 98);
 
   font-family: Geist, system-ui;
   line-height: 1.5;
@@ -16,8 +16,6 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  scrollbar-gutter: stable;
 }
 
 * {

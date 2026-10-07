@@ -1,6 +1,7 @@
 ---
 import { ClientRouter } from "astro:transitions";
 
+import Footer from "@/components/Footer.astro";
 import Header from "@/components/Header.astro";
 import "@/styles/global.css";
 
@@ -35,18 +36,28 @@ const { title = "Justin Li", headerAsHeading = false } = Astro.props;
         <slot />
       </main>
     </div>
+    <Footer />
   </body>
 </html>
 
 <style>
+  body {
+    display: flex;
+    flex-direction: column;
+    /* Keep layout stable while mobile browser bars expand/collapse. */
+    min-height: 100svh;
+  }
+
   .page {
     display: flex;
     flex-direction: column;
+    flex-grow: 1;
     gap: 2rem;
     max-width: 700px;
-    /* Keep layout stable while mobile browser bars expand/collapse. */
-    min-height: 100svh;
-    margin: 0 auto;
+    /* Center against the viewport (100vw includes the scrollbar) so the column
+       doesn't shift between pages with and without a scrollbar. Unlike
+       scrollbar-gutter, this lets the footer span the full width. */
+    margin-left: max(0px, (100vw - 700px) / 2);
     padding: 4rem 2rem 2rem;
   }
 
