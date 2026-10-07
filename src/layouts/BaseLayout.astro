@@ -6,21 +6,14 @@ import "@/styles/global.css";
 
 type Props = {
   title?: string;
-  centered?: boolean;
   headerAsHeading?: boolean;
-  split?: boolean;
 };
 
-const {
-  title = "Justin Li",
-  centered = true,
-  headerAsHeading = false,
-  split = false,
-} = Astro.props;
+const { title = "Justin Li", headerAsHeading = false } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" transition:animate="none">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/favicon.png" sizes="64x64" />
@@ -36,39 +29,20 @@ const {
   </head>
 
   <body>
-    <div class:list={["page", { centered, split }]}>
-      <div class="page-content">
-        <Header asHeading={headerAsHeading} />
-        <main>
-          <slot />
-        </main>
-      </div>
-      {split && (
-        <div class="visual">
-          <slot name="visual" />
-        </div>
-      )}
+    <div class="page">
+      <Header asHeading={headerAsHeading} />
+      <main>
+        <slot />
+      </main>
     </div>
   </body>
 </html>
 
 <style>
-  :global(:root) {
-    --header-transition-duration: 250ms;
-  }
-
-  :global(::view-transition-group(site-header)) {
-    animation-duration: var(--header-transition-duration);
-  }
-
-  :global(::view-transition-new(root)) {
-    animation-delay: var(--header-transition-duration);
-    animation-fill-mode: both;
-  }
-
   .page {
     display: flex;
     flex-direction: column;
+    gap: 2rem;
     max-width: 700px;
     /* Keep layout stable while mobile browser bars expand/collapse. */
     min-height: 100svh;
@@ -76,85 +50,9 @@ const {
     padding: 4rem 2rem 2rem;
   }
 
-  .page-content {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .page.split {
-    max-width: none;
-    min-height: 100dvh;
-    padding: 0;
-  }
-
-  .page.split .page-content {
-    padding: 4rem 2rem 3rem;
-  }
-
-  .visual {
-    position: relative;
-    flex-grow: 1;
-    height: clamp(18rem, 72vw, 30rem);
-  }
-
-  .visual::before {
-    --fade-direction: to bottom;
-    position: absolute;
-    z-index: 1;
-    top: 0;
-    right: 0;
-    left: 0;
-    height: clamp(5rem, 20vw, 9rem);
-    pointer-events: none;
-    content: "";
-    background: linear-gradient(
-      var(--fade-direction),
-      var(--color-bg),
-      color-mix(in srgb, var(--color-bg) 88%, transparent) 20%,
-      color-mix(in srgb, var(--color-bg) 55%, transparent) 46%,
-      color-mix(in srgb, var(--color-bg) 22%, transparent) 72%,
-      transparent
-    );
-  }
-
   main {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-  }
-
-  @media (min-width: 768px) {
-    .page.centered:not(.split) {
-      justify-content: center;
-      padding: 2rem 2rem 8rem;
-    }
-  }
-
-  @media (min-width: 900px) {
-    .page.split {
-      display: grid;
-      grid-template-columns: minmax(0, 5fr) minmax(0, 4fr);
-      align-items: stretch;
-    }
-
-    .page.split .page-content {
-      justify-content: center;
-      justify-self: end;
-      width: min(100%, 650px);
-      padding: 4rem clamp(2rem, 4vw, 6rem);
-    }
-
-    .page.split .visual {
-      height: 100dvh;
-    }
-
-    .visual::before {
-      --fade-direction: to right;
-      right: auto;
-      bottom: 0;
-      width: clamp(7rem, 14vw, 14rem);
-      height: auto;
-    }
+    gap: 2rem;
   }
 </style>

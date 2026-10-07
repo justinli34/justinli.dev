@@ -4,26 +4,69 @@ type Props = {
 };
 
 const { asHeading = false } = Astro.props;
+
+const links = [
+  { label: "GitHub", href: "https://github.com/justinli34" },
+  { label: "YouTube", href: "https://www.youtube.com/@justinli34" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/justinlibc" },
+  { label: "X", href: "https://x.com/justinlidev" },
+];
 ---
 
-<header transition:name="site-header">
+<header>
   {asHeading ? (
     <h1>
-      <a href="/">Justin Li</a>
+      <a class="name" href="/">
+        Justin Li
+      </a>
     </h1>
   ) : (
-    <a href="/">Justin Li</a>
+    <a class="name" href="/">
+      Justin Li
+    </a>
   )}
+  <nav class="links" aria-label="Social links">
+    {links.map(({ label, href }) => (
+      <a href={href} target="_blank" rel="noopener noreferrer">
+        {label}
+      </a>
+    ))}
+  </nav>
 </header>
 
 <style>
+  header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
   h1 {
     font: inherit;
   }
 
-  a {
+  .name {
     display: inline-flex;
     font-size: 1.5rem;
     text-decoration: none;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+  }
+
+  .links a {
+    text-decoration: none;
+  }
+
+  @media (min-width: 768px) {
+    header {
+      flex-direction: row;
+      align-items: baseline;
+      justify-content: space-between;
+    }
   }
 </style>
