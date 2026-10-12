@@ -12,27 +12,31 @@ const posts = (await getCollection("blog")).sort((first, second) =>
 <BaseLayout headerAsHeading>
   <section aria-label="About">
     <p class="about">
-      Hi, I'm Justin, a fourth-year CS student at UBC. I've previously interned
-      at Amazon and Ciena where I worked on an error classification engine for
-      accounting systems and AI agents for telecom and data center networks. I'm
-      interested in AI, distributed systems, and developer tools. Outside of
-      coding, I like to make music, play tennis, and travel.
+      Hi, I'm Justin, a fourth-year CS student at UBC. I previously interned at
+      Amazon, building an error classification engine for accounting systems,
+      and at Ciena, developing AI agents for network observability. Outside of
+      coding, I like to make music, play tennis, and travel. Feel free to
+      message me on X or LinkedIn.
     </p>
   </section>
 
   <section class="posts" aria-label="Posts">
     <ul>
       {posts.map((post) => (
-        <li>
-          <a href={`/blog/${encodeURIComponent(post.id)}`}>{post.data.title}</a>
-          {post.data.date && (
-            <>
-              <span class="leader" aria-hidden="true" />
-              <time datetime={post.data.date}>{formatDate(post.data.date)}</time>
-            </>
-          )}
-        </li>
-      ))}
+          <li>
+            <a href={`/blog/${encodeURIComponent(post.id)}`}>
+              {post.data.title}
+            </a>
+            {post.data.date && (
+              <>
+                <span class="leader" aria-hidden="true" />
+                <time datetime={post.data.date}>
+                  {formatDate(post.data.date)}
+                </time>
+              </>
+            )}
+          </li>
+        ))}
     </ul>
   </section>
 </BaseLayout>
