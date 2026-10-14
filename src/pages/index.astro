@@ -23,20 +23,18 @@ const posts = (await getCollection("blog")).sort((first, second) =>
   <section class="posts" aria-label="Posts">
     <ul>
       {posts.map((post) => (
-          <li>
-            <a href={`/blog/${encodeURIComponent(post.id)}`}>
-              {post.data.title}
-            </a>
-            {post.data.date && (
-              <>
-                <span class="leader" aria-hidden="true" />
-                <time datetime={post.data.date}>
-                  {formatDate(post.data.date)}
-                </time>
-              </>
-            )}
-          </li>
-        ))}
+        <li>
+          <a href={`/blog/${encodeURIComponent(post.id)}`}>{post.data.title}</a>
+          {post.data.date && (
+            <>
+              <span class="leader" aria-hidden="true" />
+              <time datetime={post.data.date}>
+                {formatDate(post.data.date)}
+              </time>
+            </>
+          )}
+        </li>
+      ))}
     </ul>
   </section>
 </BaseLayout>
