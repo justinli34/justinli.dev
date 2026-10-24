@@ -9,13 +9,18 @@ import "@/styles/global.css";
 type Props = {
   title?: string;
   headerAsHeading?: boolean;
+  sidebar?: boolean;
 };
 
-const { title = "Justin Li", headerAsHeading = false } = Astro.props;
+const {
+  title = "Justin Li",
+  headerAsHeading = false,
+  sidebar = false,
+} = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en" transition:animate="none">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -25,8 +30,8 @@ const { title = "Justin Li", headerAsHeading = false } = Astro.props;
   </head>
 
   <body>
-    <div class="page">
-      <Header asHeading={headerAsHeading} />
+    <div class:list={["page", { sidebar }]}>
+      <Header asHeading={headerAsHeading} sidebar={sidebar} />
       <main>
         <slot />
       </main>
@@ -39,7 +44,7 @@ const { title = "Justin Li", headerAsHeading = false } = Astro.props;
     display: flex;
     flex-direction: column;
     gap: 2rem;
-    max-width: 700px;
+    max-width: 43.75rem;
     /* Keep layout stable while mobile browser bars expand/collapse. */
     min-height: 100svh;
     margin: 0 auto;
@@ -50,5 +55,21 @@ const { title = "Justin Li", headerAsHeading = false } = Astro.props;
     display: flex;
     flex-direction: column;
     gap: 2rem;
+  }
+
+  /* Hang the header in the left gutter, keeping the content column where
+     other pages put it. Only once the gutter fits it, scrollbar included. */
+  @media (min-width: 68rem) {
+    .sidebar {
+      display: grid;
+      grid-template-columns: 1fr minmax(0, calc(43.75rem - 4rem)) 1fr;
+      align-items: baseline;
+      gap: 0 3rem;
+      max-width: none;
+    }
+
+    .sidebar main {
+      grid-column: 2;
+    }
   }
 </style>

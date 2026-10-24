@@ -1,9 +1,10 @@
 ---
 type Props = {
   asHeading?: boolean;
+  sidebar?: boolean;
 };
 
-const { asHeading = false } = Astro.props;
+const { asHeading = false, sidebar = false } = Astro.props;
 
 const links = [
   { label: "GitHub", href: "https://github.com/justinli34" },
@@ -13,25 +14,30 @@ const links = [
 ];
 ---
 
-<header>
+<header class:list={{ sidebar }}>
   {asHeading ? (
-    <h1>
-      <a class="name" href="/">
-        Justin Li
-      </a>
+    <h1 class="name" transition:name="name" transition:animate="initial">
+      Justin Li
     </h1>
   ) : (
-    <a class="name" href="/">
+    <p class="name" transition:name="name" transition:animate="initial">
       Justin Li
-    </a>
+    </p>
   )}
-  <nav class="links" aria-label="Social links">
-    {links.map(({ label, href }) => (
-      <a href={href} target="_blank" rel="noopener noreferrer">
-        {label}
-      </a>
-    ))}
-  </nav>
+  {sidebar ? (
+    <a class="back" href="/">
+      Back
+    </a>
+  ) : (
+    <nav class="links" aria-label="Social links">
+      {links.map(({ label, href }) => (
+        <a href={href} target="_blank" rel="noopener noreferrer">
+          {label}
+          <span aria-hidden="true">↗</span>
+        </a>
+      ))}
+    </nav>
+  )}
 </header>
 
 <style>
@@ -42,14 +48,8 @@ const links = [
     gap: 0.5rem;
   }
 
-  h1 {
-    font: inherit;
-  }
-
   .name {
-    display: inline-flex;
     font-size: 1.5rem;
-    text-decoration: none;
   }
 
   .links {
@@ -58,15 +58,24 @@ const links = [
     gap: 0.5rem 1rem;
   }
 
-  .links a {
+  .links a,
+  .back {
+    color: var(--color-muted);
     text-decoration: none;
   }
 
-  @media (min-width: 768px) {
-    header {
-      flex-direction: row;
-      align-items: baseline;
-      justify-content: space-between;
+  .links a:is(:hover, :focus-visible),
+  .back:is(:hover, :focus-visible) {
+    color: var(--color-fg);
+  }
+
+  @media (min-width: 68rem) {
+    .sidebar {
+      grid-column: 1;
+      justify-self: end;
+      width: 8rem;
+      position: sticky;
+      top: 4rem;
     }
   }
 </style>

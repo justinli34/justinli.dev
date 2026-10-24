@@ -19,7 +19,7 @@ const { post } = Astro.props;
 const { Content } = await render(post);
 ---
 
-<BaseLayout title={`${post.data.title} | Justin Li`}>
+<BaseLayout title={`${post.data.title} | Justin Li`} sidebar>
   <article>
     <header>
       <h1>{post.data.title}</h1>
@@ -37,5 +37,12 @@ const { Content } = await render(post);
   article {
     display: grid;
     gap: 1rem;
+  }
+
+  /* Same spacing as the site header, so the date lines up with the Back link. */
+  header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
   }
 </style>

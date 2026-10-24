@@ -2,7 +2,6 @@
   color-scheme: light dark;
   --color-bg: light-dark(oklch(0.98 0 0), oklch(0.17 0 0));
   --color-fg: light-dark(oklch(0.24 0 0), oklch(0.88 0 0));
-  --color-underline: light-dark(oklch(0.8 0 0), oklch(0.4 0 0));
   --color-muted: light-dark(oklch(0.5 0 0), oklch(0.62 0 0));
 
   font-family: "Open Runde", system-ui;
@@ -33,10 +32,23 @@ p {
   margin: 0;
 }
 
+h1 {
+  font: inherit;
+  font-size: 1.5rem;
+}
+
+p {
+  text-wrap: pretty;
+}
+
 a {
   color: inherit;
-  text-decoration-color: var(--color-underline);
-  text-underline-offset: 0.1em;
+  text-decoration-color: var(--color-muted);
+  text-underline-offset: 0.2em;
+}
+
+a:is(:hover, :focus-visible) {
+  text-decoration-color: var(--color-fg);
 }
 
 time {
@@ -45,4 +57,21 @@ time {
 
 article p + p {
   margin-top: 1rem;
+}
+
+/* Page transitions: the name slides into place while everything else crossfades. */
+::view-transition-group(*),
+::view-transition-old(*),
+::view-transition-new(*) {
+  animation-duration: 250ms;
+  animation-timing-function: ease-in-out;
+}
+
+::view-transition-old(name) {
+  animation: none;
+  opacity: 0;
+}
+
+::view-transition-new(name) {
+  animation: none;
 }
