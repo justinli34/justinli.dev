@@ -48,7 +48,13 @@ const {
     /* Keep layout stable while mobile browser bars expand/collapse. */
     min-height: 100svh;
     margin: 0 auto;
-    padding: 4rem 2rem 2rem;
+    padding: 2rem 1rem;
+  }
+
+  @media (min-width: 40rem) {
+    .page {
+      padding: 4rem 2rem 2rem;
+    }
   }
 
   main {
