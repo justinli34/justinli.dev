@@ -15,7 +15,7 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  scrollbar-gutter: stable;
+  scrollbar-gutter: stable both-edges;
 }
 
 * {
@@ -74,4 +74,13 @@ article p + p {
 
 ::view-transition-new(name) {
   animation: none;
+}
+
+/* Swap pages instantly on mobile. */
+@media (width < 40rem) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none;
+  }
 }
