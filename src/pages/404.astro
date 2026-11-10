@@ -1,7 +1,8 @@
 ---
+import { SITE_TITLE } from "@/consts";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 ---
 
-<BaseLayout title="Page not found | Justin Li">
+<BaseLayout title={`Page not found | ${SITE_TITLE}`} noindex>
   <p>This page doesn't exist. Go to the <a href="/">home</a> page.</p>
 </BaseLayout>

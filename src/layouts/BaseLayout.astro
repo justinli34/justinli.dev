@@ -1,33 +1,85 @@
 ---
 import { ClientRouter } from "astro:transitions";
 
-import "@fontsource/open-runde/400.css";
-import openRunde400 from "@fontsource/open-runde/files/open-runde-latin-400-normal.woff2?url";
-
+import openRunde400 from "@/assets/fonts/open-runde-400.woff2?url";
 import Footer from "@/components/Footer.astro";
 import Header from "@/components/Header.astro";
+import { SITE_DESCRIPTION, SITE_TITLE } from "@/consts";
 import "@/styles/global.css";
 
 type Props = {
   title?: string;
+  description?: string;
+  /* Set on blog posts, for og:type and article metadata. */
+  published?: string;
+  /* Keep the page out of search results, e.g. the 404 page. */
+  noindex?: boolean;
   headerAsHeading?: boolean;
   sidebar?: boolean;
 };
 
 const {
-  title = "Justin Li",
+  title = SITE_TITLE,
+  description = SITE_DESCRIPTION,
+  published,
+  noindex = false,
   headerAsHeading = false,
   sidebar = false,
 } = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL("/og.png", Astro.site);
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
+    <meta name="description" content={description} />
+    {noindex ? (
+      <meta name="robots" content="noindex" />
+    ) : (
+      <link rel="canonical" href={canonical} />
+    )}
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta
+      name="theme-color"
+      content="#f8f8f8"
+      media="(prefers-color-scheme: light)"
+    />
+    <meta
+      name="theme-color"
+      content="#0f0f0f"
+      media="(prefers-color-scheme: dark)"
+    />
+
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={SITE_TITLE}
+      href={new URL("/rss.xml", Astro.site)}
+    />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <meta property="og:site_name" content={SITE_TITLE} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:type" content={published ? "article" : "website"} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={SITE_TITLE} />
+    {published && (
+      <meta property="article:published_time" content={published} />
+    )}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:creator" content="@justinlidev" />
+
     <link
       rel="preload"
       href={openRunde400}
@@ -63,14 +115,14 @@ const {
     flex: 1;
     gap: 2rem;
     width: 100%;
-    max-width: 43.75rem;
+    max-width: var(--content-width);
     margin: 0 auto;
-    padding: 2rem 1rem;
+    padding: 2rem var(--gutter);
   }
 
   @media (min-width: 40rem) {
     .page {
-      padding: 4rem 2rem 2rem;
+      padding: 4rem var(--gutter) 2rem;
     }
   }
 
@@ -85,7 +137,9 @@ const {
   @media (min-width: 68rem) {
     .sidebar {
       display: grid;
-      grid-template-columns: 1fr minmax(0, calc(43.75rem - 4rem)) 1fr;
+      grid-template-columns:
+        1fr minmax(0, calc(var(--content-width) - 2 * var(--gutter)))
+        1fr;
       align-items: baseline;
       gap: 0 3rem;
       max-width: none;

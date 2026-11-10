@@ -4,9 +4,9 @@ import { getCollection } from "astro:content";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { formatDate } from "@/utils/date";
 
-const posts = (await getCollection("blog")).sort((first, second) =>
-  second.data.date.localeCompare(first.data.date),
-);
+import { sortPosts } from "@/utils/posts";
+
+const posts = sortPosts(await getCollection("blog"));
 ---
 
 <BaseLayout headerAsHeading>
@@ -24,10 +24,10 @@ const posts = (await getCollection("blog")).sort((first, second) =>
     <ul>
       {posts.map((post) => (
         <li>
-          <a href={`/blog/${encodeURIComponent(post.id)}`}>{post.data.title}</a>
-          {post.data.date && (
-            <time datetime={post.data.date}>{formatDate(post.data.date)}</time>
-          )}
+          <a href={`/blog/${encodeURIComponent(post.id)}/`}>
+            {post.data.title}
+          </a>
+          <time datetime={post.data.date}>{formatDate(post.data.date)}</time>
         </li>
       ))}
     </ul>
@@ -53,6 +53,10 @@ const posts = (await getCollection("blog")).sort((first, second) =>
   }
 
   .posts a {
-    text-decoration: none;
+    text-decoration-line: none;
+  }
+
+  .posts a:is(:hover, :focus-visible) {
+    text-decoration-line: underline;
   }
 </style>

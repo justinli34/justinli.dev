@@ -37,6 +37,17 @@
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    canvas.style.height = `${ROWS * CELL}px`;
+
+    /* The cell colour comes from CSS. Re-read it only when the colour
+       scheme changes, not every frame. */
+    let color = getComputedStyle(canvas).color;
+    const darkScheme = matchMedia("(prefers-color-scheme: dark)");
+    darkScheme.addEventListener("change", () => {
+      color = getComputedStyle(canvas).color;
+      draw();
+    });
+
     let cols = 0;
     let cells = new Uint8Array(0);
     let next = new Uint8Array(0);
@@ -125,8 +136,7 @@
        1 - alpha, and cells in both at full strength. */
     const paint = (now: Uint8Array, was: Uint8Array, alpha: number) => {
       ctx.clearRect(0, 0, cols * CELL, ROWS * CELL);
-      /* Read every frame so the cells follow light/dark changes. */
-      ctx.fillStyle = getComputedStyle(canvas).color;
+      ctx.fillStyle = color;
 
       for (let y = 0; y < ROWS; y++) {
         for (let x = 0; x < cols; x++) {
@@ -244,21 +254,16 @@
   /* Match the text column in BaseLayout. */
   footer {
     width: 100%;
-    max-width: 43.75rem;
+    max-width: var(--content-width);
     margin: 0 auto;
-    padding: 0 1rem 2rem;
-  }
-
-  @media (min-width: 40rem) {
-    footer {
-      padding: 0 2rem 2rem;
-    }
+    padding: 0 var(--gutter) 2rem;
   }
 
   canvas {
     display: block;
     width: 100%;
-    /* ROWS * CELL in the script. */
+    /* The script sets the real height (ROWS * CELL); this reserves the
+       space before it runs. */
     height: 168px;
     color: var(--color-muted);
     filter: url(#life-blobs);
