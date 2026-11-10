@@ -4,10 +4,6 @@ import { defineConfig } from "astro/config";
 export default defineConfig({
   site: "https://justinli.dev",
   integrations: [sitemap()],
-  prefetch: {
-    prefetchAll: true,
-    defaultStrategy: "hover",
-  },
   build: {
     /* Inlined per-page <style> tags get swapped on ClientRouter navigation,
        which re-registers @font-face and flashes the fallback font. */
