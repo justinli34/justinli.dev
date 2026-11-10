@@ -2,6 +2,7 @@
 import { ClientRouter } from "astro:transitions";
 
 import "@fontsource/open-runde/400.css";
+import openRunde400 from "@fontsource/open-runde/files/open-runde-latin-400-normal.woff2?url";
 
 import Footer from "@/components/Footer.astro";
 import Header from "@/components/Header.astro";
@@ -27,6 +28,13 @@ const {
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
+    <link
+      rel="preload"
+      href={openRunde400}
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
     <ClientRouter fallback="none" />
   </head>
 
