@@ -3,6 +3,7 @@ import { ClientRouter } from "astro:transitions";
 
 import "@fontsource/open-runde/400.css";
 
+import Footer from "@/components/Footer.astro";
 import Header from "@/components/Header.astro";
 import "@/styles/global.css";
 
@@ -36,17 +37,25 @@ const {
         <slot />
       </main>
     </div>
+    <Footer />
   </body>
 </html>
 
 <style>
+  body {
+    display: flex;
+    flex-direction: column;
+    /* Keep layout stable while mobile browser bars expand/collapse. */
+    min-height: 100svh;
+  }
+
   .page {
     display: flex;
     flex-direction: column;
+    flex: 1;
     gap: 2rem;
+    width: 100%;
     max-width: 43.75rem;
-    /* Keep layout stable while mobile browser bars expand/collapse. */
-    min-height: 100svh;
     margin: 0 auto;
     padding: 2rem 1rem;
   }

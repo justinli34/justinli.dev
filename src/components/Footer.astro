@@ -1,0 +1,270 @@
+<footer>
+  <canvas aria-hidden="true" transition:persist="life"></canvas>
+  <!-- Blur the cells, then sharpen the alpha back to a hard edge, so
+       neighbouring cells melt into blobs instead of reading as a grid. -->
+  <svg aria-hidden="true" width="0" height="0">
+    <filter id="life-blobs" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="3"></feGaussianBlur>
+      <feColorMatrix
+        values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7"
+      ></feColorMatrix>
+    </filter>
+  </svg>
+</footer>
+
+<script>
+  const CELL = 8;
+  const ROWS = 21;
+  const STEP_MS = 120;
+  /* How often to check whether the board has settled into a loop. Catches
+     still lifes and oscillators of period 1, 2, 3, 4, 6 and 12. */
+  const STALE_CHECK = 12;
+  /* Restart even if the board never settles. */
+  const MAX_GENERATIONS = 240;
+  /* When restarting, the board holds still while whatever was left fades
+     out and the new seed fades in. */
+  const RESEED_MS = 1600;
+
+  /* A small symmetric seed, dropped in the centre of the board. It pulses
+     outward in rings, leaving the middle empty behind it, then settles (or
+     dies out) after ~130 generations at any board width, which triggers a
+     fresh seed. */
+  const SEED = ["#.#.#.#", "##...##", "#..#..#", "##...##", "#.#.#.#"];
+
+  const started = new WeakSet<HTMLCanvasElement>();
+
+  function start(canvas: HTMLCanvasElement) {
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let cols = 0;
+    let cells = new Uint8Array(0);
+    let next = new Uint8Array(0);
+    let snapshot = new Uint8Array(0);
+    /* What was on the board when it last restarted, for the crossfade. */
+    let leftover = new Uint8Array(0);
+    let generation = 0;
+    /* Set by step() when it restarts the board; tick() starts the crossfade. */
+    let reseeded = false;
+
+    /* Clear the board and drop the seed in the middle. */
+    const seed = () => {
+      cells.fill(0);
+      const top = (ROWS - SEED.length) >> 1;
+      const left = (cols - SEED[0].length) >> 1;
+      SEED.forEach((line, dy) => {
+        for (let dx = 0; dx < line.length; dx++) {
+          const x = left + dx;
+          if (line[dx] === "#" && x >= 0 && x < cols) {
+            cells[(top + dy) * cols + x] = 1;
+          }
+        }
+      });
+      /* Mark the seed as already shown, so it doesn't fade in again once
+         the crossfade hands back to draw(). */
+      next.set(cells);
+      generation = 0;
+    };
+
+    const reseed = () => {
+      leftover.set(cells);
+      seed();
+      reseeded = true;
+    };
+
+    /* The board wraps around on both axes. */
+    const step = () => {
+      for (let y = 0; y < ROWS; y++) {
+        const up = ((y + ROWS - 1) % ROWS) * cols;
+        const row = y * cols;
+        const down = ((y + 1) % ROWS) * cols;
+
+        for (let x = 0; x < cols; x++) {
+          const left = (x + cols - 1) % cols;
+          const right = (x + 1) % cols;
+          const neighbours =
+            cells[up + left] +
+            cells[up + x] +
+            cells[up + right] +
+            cells[row + left] +
+            cells[row + right] +
+            cells[down + left] +
+            cells[down + x] +
+            cells[down + right];
+
+          next[row + x] =
+            neighbours === 3 || (neighbours === 2 && cells[row + x]) ? 1 : 0;
+        }
+      }
+
+      [cells, next] = [next, cells];
+      generation++;
+
+      if (generation >= MAX_GENERATIONS) {
+        reseed();
+      } else if (generation % STALE_CHECK === 0) {
+        if (cells.every((cell, i) => cell === snapshot[i])) reseed();
+        snapshot.set(cells);
+      }
+    };
+
+    /* Draw part-way (t from 0 to 1) between the previous generation, which
+       step() leaves in `next`, and the current one. Cells being born fade in
+       and dying cells fade out; through the blob filter this reads as the
+       blobs swelling and shrinking rather than jumping. */
+    const draw = (t = 1) => {
+      paint(cells, next, t * t * (3 - 2 * t));
+    };
+
+    /* Crossfade (t from 0 to 1) from the leftovers to the fresh seed. */
+    const drawReseed = (t: number) => {
+      paint(cells, leftover, t * t * (3 - 2 * t));
+    };
+
+    /* Cells only in `now` are drawn at `alpha`, cells only in `was` at
+       1 - alpha, and cells in both at full strength. */
+    const paint = (now: Uint8Array, was: Uint8Array, alpha: number) => {
+      ctx.clearRect(0, 0, cols * CELL, ROWS * CELL);
+      /* Read every frame so the cells follow light/dark changes. */
+      ctx.fillStyle = getComputedStyle(canvas).color;
+
+      for (let y = 0; y < ROWS; y++) {
+        for (let x = 0; x < cols; x++) {
+          const i = y * cols + x;
+          if (!now[i] && !was[i]) continue;
+          ctx.globalAlpha = now[i] && was[i] ? 1 : now[i] ? alpha : 1 - alpha;
+          ctx.fillRect(x * CELL, y * CELL, CELL, CELL);
+        }
+      }
+      ctx.globalAlpha = 1;
+    };
+
+    const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+
+    const resize = () => {
+      const dpr = window.devicePixelRatio || 1;
+      const width = canvas.clientWidth;
+      const newCols = Math.ceil(width / CELL);
+
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(ROWS * CELL * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      if (newCols !== cols) {
+        cols = newCols;
+        cells = new Uint8Array(cols * ROWS);
+        next = new Uint8Array(cols * ROWS);
+        snapshot = new Uint8Array(cols * ROWS);
+        leftover = new Uint8Array(cols * ROWS);
+        reseeded = false;
+        fadeStart = 0;
+        seed();
+        /* Without animation, show the ripple part-way out rather than the
+           bare seed. */
+        if (reducedMotion.matches) {
+          for (let i = 0; i < 50; i++) step();
+        }
+      }
+
+      draw();
+    };
+
+    let frame = 0;
+    let last = 0;
+    let fadeStart = 0;
+
+    const tick = (now: number) => {
+      if (!canvas.isConnected) {
+        frame = 0;
+        return;
+      }
+      frame = requestAnimationFrame(tick);
+
+      if (fadeStart) {
+        const t = (now - fadeStart) / RESEED_MS;
+        if (t < 1) {
+          drawReseed(t);
+          return;
+        }
+        fadeStart = 0;
+        last = now;
+      }
+
+      if (now - last >= STEP_MS) {
+        /* Keep a steady rhythm, but don't try to catch up after a long gap. */
+        last = now - last < STEP_MS * 2 ? last + STEP_MS : now;
+        step();
+        if (reseeded) {
+          reseeded = false;
+          fadeStart = now;
+          drawReseed(0);
+          return;
+        }
+      }
+      draw(Math.min((now - last) / STEP_MS, 1));
+    };
+
+    const play = () => {
+      if (!frame && !reducedMotion.matches) {
+        frame = requestAnimationFrame(tick);
+      }
+    };
+
+    const pause = () => {
+      cancelAnimationFrame(frame);
+      frame = 0;
+    };
+
+    new ResizeObserver(resize).observe(canvas);
+
+    /* Only run while the footer is on screen. */
+    let visible = false;
+    new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      if (visible) play();
+      else pause();
+    }).observe(canvas);
+
+    reducedMotion.addEventListener("change", () => {
+      if (reducedMotion.matches) pause();
+      else if (visible) play();
+    });
+  }
+
+  /* The canvas persists across page transitions, so only start it once. */
+  document.addEventListener("astro:page-load", () => {
+    const canvas = document.querySelector<HTMLCanvasElement>("footer canvas");
+    if (!canvas || started.has(canvas)) return;
+    started.add(canvas);
+    start(canvas);
+  });
+</script>
+
+<style>
+  /* Match the text column in BaseLayout. */
+  footer {
+    width: 100%;
+    max-width: 43.75rem;
+    margin: 0 auto;
+    padding: 0 1rem 2rem;
+  }
+
+  @media (min-width: 40rem) {
+    footer {
+      padding: 0 2rem 2rem;
+    }
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    /* ROWS * CELL in the script. */
+    height: 168px;
+    color: var(--color-muted);
+    filter: url(#life-blobs);
+  }
+
+  svg {
+    position: absolute;
+  }
+</style>
